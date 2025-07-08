@@ -1,0 +1,70 @@
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# Rider
+.idea/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+# NuGet v3's project.json files produces this folder
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Microsoft Azure Web App publish settings
+*.PublishSettings
+
+# User secrets
+secrets.json
+*.userprefs
+
+# Local database files
+*.mdf
+*.ldf
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# DotCover
+*.dotCover
+
+# NCrunch
+*.ncrunch*
+.*crunch*.local.xml
+
+# SonarQube
+.sonar/
+
+# Others
+*.vs/
