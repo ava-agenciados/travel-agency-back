@@ -1,23 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace travel_agency_back.Models
 {
-    public class User
+    public class User : IdentityUser
     {
         [Required]
-        private string _firstName;
+        public string FirstName { get; set; }
 
         [Required]
-        private string _lastName;
+        public string LastName { get; set; }
 
         [Required]
-        [EmailAddress]
-        private string _email;
+        public string CPFPassport { get; set; }
 
-        [Required]
-        [MinLength(6)]
-        [DataType(DataType.Password)]
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, and one digit.")]
-        private string _password;
+       // public ICollection<UserPackages> UserPackages { get; set; } = new List<UserPackages>();
+
     }
 }

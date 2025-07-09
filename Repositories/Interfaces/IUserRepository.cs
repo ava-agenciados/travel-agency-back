@@ -1,4 +1,7 @@
-﻿namespace travel_agency_back.Repositories.Interfaces
+﻿using Microsoft.AspNetCore.Identity;
+using travel_agency_back.Models;
+
+namespace travel_agency_back.Repositories.Interfaces
 {
     public interface IUserRepository
     {
@@ -9,11 +12,6 @@
         /// UserCpfPassportExists: Verifica se o CPF ou passaporte já está cadastrado
         /// 
 
-        public void CreateUser(string firstName, string lastName, string cpfPassport, string email, string password);
 
-        public bool UserEmailExists(string email);
-
-        public bool UserCpfPassportExists(string cpfPassport);
-        
     }
 }
