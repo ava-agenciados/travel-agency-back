@@ -67,22 +67,31 @@ namespace travel_agency_back.Controllers
             return BadRequest(result.Errors.Select(e => e.Description));
         }
 
-        // Método para autenticar um usuário
+        // Novo método de login que retorna o token JWT
         [HttpPost]
         [Route("auth/login")]
-        public Task<IActionResult> Login([FromBody] LoginUserRequestDTO userDTO)
+        public async Task<IActionResult> Login([FromBody] LoginUserRequestDTO userDTO)
         {
-            // Verifica se o email e a senha são válidos
-            var result = _authService.LoginAsync(userDTO.Email, userDTO.Password);
-
-            // Verifica se o login foi bem-sucedido
-            if (result.Result.Succeeded)
+            // Tenta autenticar o usuário e gerar o token JWT
+            var (result, token) = await _authService.LoginWithTokenAsync(userDTO.Email, userDTO.Password);
+            if (result.Succeeded && token != null)
             {
-                // Autentica o usuário na aplicação
-                return Task.FromResult<IActionResult>(Ok("Login successful"));
+                // Adiciona o token JWT como cookie HttpOnly na resposta
+                Response.Cookies.Append(
+                    "jwt", // nome do cookie
+                    token, // valor do token JWT
+                    new CookieOptions
+                    {
+                        HttpOnly = true, // protege contra acesso via JavaScript
+                        Secure = true,   // só envia em HTTPS
+                        SameSite = SameSiteMode.Strict, // protege contra CSRF
+                        Expires = DateTimeOffset.UtcNow.AddHours(2)
+                    }
+                );
+                // Retorna o valor do token no corpo da resposta para visualização
+                return Ok(new { token });
             }
-            // Se o login falhar, retorna uma resposta de erro
-            return Task.FromResult<IActionResult>(Unauthorized("Invalid email or password"));
+            return Unauthorized("Invalid email or password");
         }
 
         // Método para gerar um link de redefinição de senha
@@ -93,7 +102,7 @@ namespace travel_agency_back.Controllers
             // Verifica se o email é válido
             var user = await _authService.FindByEmailAsync(forgotPasswordDTO.Email);
             // Verifica se o usuário existe
-            if (user == null)
+            if (user == null) 
             {
                 return NotFound("Email not found");
             }
