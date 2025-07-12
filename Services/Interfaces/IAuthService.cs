@@ -5,13 +5,13 @@ namespace travel_agency_back.Services.Interfaces
 {
     public interface IAuthService
     {
-        // Novo método para login com retorno de token JWT
-        Task<(SignInResult Result, string Token)> LoginWithTokenAsync(string email, string password);
-        public Task<SignInResult> LoginAsync(string email, string password);
+        public Task<(SignInResult Result, string Token)> LoginWithTokenAsync(string email, string password);
         public Task<IdentityResult> RegisterAsync(string firstname, string lastname, string email, string CPFPassport, string password);
-        public Task<User> FindByEmailAsync(string email);
-        public Task<string> GeneratePasswordResetTokenAsync(User user);
-        public Task<SignInResult> ResetPasswordAsync(User user, string token, string newPassword);
+        public Task<bool> Logout(string token);
+        Task GetUserByEmailAsync(string email);
+
+        public Task<(IdentityResult, string URL, bool emailSent)> GeneratePasswordResetTokenAsync(string email);
+        public Task<IdentityResult> ResetPasswordAsync(string token, string email, string newPassword);
     }
 
 }

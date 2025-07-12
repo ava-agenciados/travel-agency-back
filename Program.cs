@@ -6,7 +6,10 @@ using Microsoft.OpenApi.Models; // Necessário para configuração do Swagger com J
 using System.Text; // Adicionado para JWT
 using travel_agency_back.Data;
 using travel_agency_back.Models;
+using travel_agency_back.Repositories;
+using travel_agency_back.Repositories.Interfaces;
 using travel_agency_back.Services;
+using travel_agency_back.Services.Interfaces;
 using travel_agency_back.Utils;
 
 
@@ -51,6 +54,10 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 
 // Substitui o hasher padrão do Identity por uma implementação baseada em BCrypt, garantindo que as senhas dos usuários sejam armazenadas usando o algoritmo BCrypt.
 builder.Services.AddScoped<IPasswordHasher<User>, BcryptPasswordHasher<User>>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<AuthService>(); // Registra o AuthService para ser injetado nos controllers
+
 
 // Configura o ASP.NET Core Identity para usar a entidade User personalizada e roles (IdentityRole).
 // Define que não é necessário confirmar a conta por e-mail para autenticação.
@@ -99,9 +106,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 // =====================================================
-
-// Registra o AuthService para injeção de dependência, permitindo que seja utilizado nos controllers.
-builder.Services.AddScoped<AuthService>(); // Registra o AuthService para ser injetado nos controllers
 
 // Constrói a aplicação web com as configurações e serviços definidos acima.
 var app = builder.Build();

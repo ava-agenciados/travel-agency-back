@@ -24,5 +24,8 @@ namespace travel_agency_back.Data
             : base(options)
         {
         }
+
+
+
     }
 }

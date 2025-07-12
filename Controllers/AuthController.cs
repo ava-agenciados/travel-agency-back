@@ -5,6 +5,7 @@ using System.Net;
 using travel_agency_back.DTOs.Requests;
 using travel_agency_back.DTOs.Resposes;
 using travel_agency_back.Services;
+using travel_agency_back.Services.Interfaces;
 using travel_agency_back.Third_party.Mail;
 
 namespace travel_agency_back.Controllers
@@ -34,7 +35,7 @@ namespace travel_agency_back.Controllers
     public class AuthController : ControllerBase
     {
         //Injeção de dependência do serviço de autenticação
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
 
         //Construtor que recebe o serviço de autenticação
         public AuthController(AuthService authService)
@@ -48,7 +49,7 @@ namespace travel_agency_back.Controllers
         public async Task<IActionResult> Register([FromBody] CreateUserRequestDTO userDTO)
         {
             //Realiza a validação dos dados do usuário
-            var result = await _authService.RegisterAsync(
+            var UserRegister = await _authService.RegisterAsync(
                 userDTO.FirstName,
                 userDTO.LastName,
                 userDTO.Email,
@@ -56,15 +57,17 @@ namespace travel_agency_back.Controllers
                 userDTO.Password
             );
             //Verifica se o registro foi bem-sucedido
-            if (result.Succeeded)
+            if (UserRegister.Succeeded)
             {
                 //Verifica se o usuário foi criado com sucesso
                 //TODO: Enviar um email de confirmação de registro
-                //Returna uma resposta de sucesso
-                return Ok("User registered successfully");
+                //Returna uma resposta de sucess
+
+                return Ok(new GenericResponseDTO(200, "Usuário registrado com sucesso!", true));
             }
+
             //Se o registro falhar, retorna uma resposta de erro com as mensagens de validação
-            return BadRequest(result.Errors.Select(e => e.Description));
+            return BadRequest(new GenericResponseDTO(400, "O endereço de email, CPF ou número de passaporte já está em uso!", false));
         }
 
         // Novo método de login que retorna o token JWT
@@ -72,101 +75,75 @@ namespace travel_agency_back.Controllers
         [Route("auth/login")]
         public async Task<IActionResult> Login([FromBody] LoginUserRequestDTO userDTO)
         {
+            if (userDTO == null || string.IsNullOrEmpty(userDTO.Email) || string.IsNullOrEmpty(userDTO.Password))
+            {
+                return BadRequest(new GenericResponseDTO(400, "Endereço de e-mail e senha são obrigatórios", false));
+            }
             // Tenta autenticar o usuário e gerar o token JWT
             var (result, token) = await _authService.LoginWithTokenAsync(userDTO.Email, userDTO.Password);
-            if (result.Succeeded && token != null)
+
+            // Verifica se a autenticação foi bem-sucedida
+            if (result.Succeeded && !string.IsNullOrEmpty(token))
             {
-                // Adiciona o token JWT como cookie HttpOnly na resposta
                 Response.Cookies.Append(
-                    "jwt", // nome do cookie
-                    token, // valor do token JWT
+                    "jwt",
+                    token,
                     new CookieOptions
                     {
-                        HttpOnly = true, // protege contra acesso via JavaScript
-                        Secure = true,   // só envia em HTTPS
-                        SameSite = SameSiteMode.Strict, // protege contra CSRF
+                        HttpOnly = true,
+                        Secure = true, // Use true em produção (HTTPS)
+                        SameSite = SameSiteMode.Strict, // Ou Lax, conforme necessidade
                         Expires = DateTimeOffset.UtcNow.AddHours(2)
                     }
                 );
-                // Retorna o valor do token no corpo da resposta para visualização
-                return Ok(new { token });
+                return Ok(new GenericResponseDTO(200, "Usuário autenticado com sucesso!", true));
             }
-            return Unauthorized("Invalid email or password");
-        }
-
-        // Método para gerar um link de redefinição de senha
-        [HttpPost]
-        [Route("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDTO forgotPasswordDTO)
-        {
-            // Verifica se o email é válido
-            var user = await _authService.FindByEmailAsync(forgotPasswordDTO.Email);
-            // Verifica se o usuário existe
-            if (user == null) 
-            {
-                return NotFound("Email not found");
-            }
-            // Verifica se o usuário existe
-            var result = await _authService.GeneratePasswordResetTokenAsync(user);
-
-            //Codifica o Token para URL
-            var encondedToken = System.Net.WebUtility.UrlEncode(result);
-
-            // Gera o link de redefinição de senha
-            var resetLink = Url.Action(
-              "ResetPassword",
-                "Auth",
-                new { token = encondedToken, email = forgotPasswordDTO.Email },
-                Request.Scheme
-            );
-
-            // Retorno de comfirmação de envio do email de redefinição de senha
-            return Ok($"Password reset link sent to email address: {forgotPasswordDTO.Email}");
-
+            return Unauthorized(new GenericResponseDTO(401, "Endereço de e-mail ou senha estão incorretos", false));
         }
         [HttpPost]
-        [Route("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromQuery]string token, [FromQuery]string email,[FromBody]NewPasswordRequestDTO newPassword)
+        [Route("auth/logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
         {
-            // Verifica se o email é válido
-            var user = await _authService.FindByEmailAsync(email);
-
-            // Verifica se o usuário não este vazio ou nulo
-            if (user == null)
-            {
-                return NotFound(new JSONResponseDTO<object>(
-                        StatusCode: StatusCodes.Status404NotFound,
-                        Message: "User not found",
-                        Success: false,
-                        Data: DateTime.UtcNow.ToString("o")
-                    ));
-            }
-
-            // Verifica se o token não está vazio ou nulo
-            if (string.IsNullOrEmpty(token))
-            {
-                return BadRequest(new JSONResponseDTO<object>(
-                        StatusCode: StatusCodes.Status400BadRequest,
-                        Message: "Token is required",
-                        Success: false,
-                        Data: DateTime.UtcNow.ToString("o")
-                    ));
-            }
-
-            // Verifica se a nova senha não está vazia ou nula
-            if (string.IsNullOrEmpty(newPassword.NewPassword))
-            {
-                return BadRequest("New password is required");
-            }
-
-            // Decodifica o token
-            var rawToken = System.Net.WebUtility.UrlDecode(token);
-
-            // Verifica se o token é válido e redefine a senha
-            var result = await _authService.ResetPasswordAsync(user, token, newPassword.NewPassword);
-          
-            //EmailConfiguration.SendPasswordResetEmail(email, "Your password has been reset successfully.");
-           return Ok("Your password has been reset successfully.");
+            // Remove o cookie JWT ao fazer logout
+            //TODO: REFATORAR ISSO AQUI PELO AMOR!!!!!!!!!!!!!!!!!!!!
+            Response.Cookies.Delete("jwt");
+            return Ok(new GenericResponseDTO(200, "Usuário deslogado com sucesso!", true));
         }
+
+        [HttpPost]
+        [Route("auth/forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDTO request)
+        {
+            if (string.IsNullOrEmpty(request.Email))
+            {
+                return BadRequest(new GenericResponseDTO(400, "Endereço de e-mail é obrigatório", false));
+            }
+
+            var (result, url, emailSent) = await _authService.GeneratePasswordResetTokenAsync(request.Email);
+            if (!result.Succeeded)
+            {
+                return BadRequest(new GenericResponseDTO(400, "Erro ao gerar token de redefinição de senha", false));
+            }
+            return Ok(new GenericResponseDTO(200, $"Instruções para redefinir a senha foram enviadas para o seu e-mail {request.Email}", true));
+        }
+        [HttpPut]
+        [Route("auth/reset-password")]
+        public async Task<IActionResult> ResetPassword([FromQuery] string token, [FromQuery] string email, [FromBody] ResetPasswordRequestDTO request)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(request.Password))
+            {
+                return BadRequest(new GenericResponseDTO(400, "Token, e-mail e nova senha são obrigatórios", false));
+            }
+            // Busca o usuário pelo e-mail
+            // Tenta redefinir a senha do usuário
+            var resetResult = await _authService.ResetPasswordAsync(token, email, request.Password);
+            if (resetResult.Succeeded)
+            {
+                return Ok(new GenericResponseDTO(200, "Senha redefinida com sucesso!", true));
+            }
+
+            return BadRequest(new GenericResponseDTO(400, "Erro ao redefinir a senha", false));
+        }   
     }
 }

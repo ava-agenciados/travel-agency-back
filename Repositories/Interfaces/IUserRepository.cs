@@ -11,7 +11,9 @@ namespace travel_agency_back.Repositories.Interfaces
         /// UserEmailExists: Verifica se o email já está cadastrado
         /// UserCpfPassportExists: Verifica se o CPF ou passaporte já está cadastrado
         /// 
+        public bool UserCPFPassportExists(string CPFPassport);
 
+        //Pacotes do usuario
 
     }
 }

@@ -14,7 +14,5 @@ namespace travel_agency_back.Models
         [Required]
         public string CPFPassport { get; set; }
 
-       // public ICollection<UserPackages> UserPackages { get; set; } = new List<UserPackages>();
-
     }
 }
