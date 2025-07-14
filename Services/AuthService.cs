@@ -4,27 +4,27 @@ using travel_agency_back.Services.Interfaces;
 
 namespace travel_agency_back.Services
 {
-
-    ///<summary>
-    ///
+    /// <summary>
+    /// Serviço de autenticação responsável apenas por login e geração de token JWT.
+    /// Toda lógica de usuário (registro, reset, etc) deve estar no UserService.
+    /// </summary>
     public class AuthService : IAuthService
     {
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
-        public AuthService(UserManager<User> userManager, SignInManager<User> signInManager)
+        private readonly IUserService _userService;
+
+        public AuthService(IUserService userService)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
+            _userService = userService;
         }
 
-        public async Task<SignInResult> LoginAsync(string email, string password)
+        public async Task<(SignInResult Result, string Token)> LoginWithTokenAsync(string email, string password)
         {
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
+            var (result, token) = await _userService.LoginWithTokenAsync(email, password);
+            if (result == null && string.IsNullOrEmpty(token))
             {
-                return SignInResult.Failed;
+                return (SignInResult.Failed, null);
             }
-            return await _signInManager.PasswordSignInAsync(user, password, isPersistent: false, lockoutOnFailure: false);
+            return (result, token);
         }
 
         public async Task<IdentityResult> RegisterAsync(string firstname, string lastname, string email, string CPFPassport, string password)
@@ -34,44 +34,54 @@ namespace travel_agency_back.Services
                 FirstName = firstname,
                 LastName = lastname,
                 Email = email,
-                UserName = email,
                 CPFPassport = CPFPassport
             };
-            var result = await _userManager.CreateAsync(user, password);
-            if(!result.Succeeded)
-            {
-               await _signInManager.SignInAsync(user, isPersistent: false);
-            }
-            return result;
+            return await _userService.RegisterAsync(
+                user.FirstName,
+                user.LastName,
+                user.Email,
+                user.CPFPassport,
+                password
+            );
         }
-        public async Task<User> FindByEmailAsync(string email)
+        public Task<bool> Logout(string token)
         {
-            return await _userManager.FindByEmailAsync(email);
+            throw new NotImplementedException();
         }
-        public async Task<string> GeneratePasswordResetTokenAsync(User user)
+        public async Task<(IdentityResult, string URL, bool emailSent)> GeneratePasswordResetTokenAsync(string email)
         {
+            var (user, URL, emailSent) = await _userService.GeneratePasswordResetTokenAsync(email);
 
-            return await _userManager.GeneratePasswordResetTokenAsync(user);
-            
+            if (user == null)
+            {
+                return (IdentityResult.Failed(), null, false);
+            }
+            if (string.IsNullOrEmpty(URL))
+            {
+                return (IdentityResult.Failed(), null, false);
+            }
+            return (IdentityResult.Success, URL, emailSent);
         }
 
-        public Task<SignInResult> ResetPasswordAsync(User user, string token, string newPassword)
+
+        public Task GetUserByEmailAsync(string email)
         {
-            if(user == null || string.IsNullOrEmpty(token) || string.IsNullOrEmpty(newPassword))
-            {
-                return Task.FromResult(SignInResult.Failed);
-            }
-            var result = _userManager.ResetPasswordAsync(user, token, newPassword);
+            throw new NotImplementedException();
+        }
 
-            if(!result.Result.Succeeded)
+        public async Task<IdentityResult> ResetPasswordAsync(string token, string email, string newPassword)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(newPassword))
             {
-                foreach (var error in result.Result.Errors)
-                {
-                    Console.WriteLine($"[Reset Error] {error.Code} - {error.Description}");
-                }
+                return IdentityResult.Failed();
             }
 
-            return Task.FromResult(SignInResult.Success);
+            var resetResult = await _userService.ResetPasswordAsync(token, email, newPassword);
+            if (resetResult == null || !resetResult.Succeeded)
+            {
+                return IdentityResult.Failed();
+            }
+            return IdentityResult.Success;
         }
     }
 }
