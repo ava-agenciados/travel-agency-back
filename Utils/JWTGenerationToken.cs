@@ -13,12 +13,14 @@ namespace travel_agency_back.Utils
         private static DateTime _EXPIRATION_HOURS = DateTime.UtcNow.AddHours(24); // Define a expiração do token em horas(24 horas)
 
         // Método para obter a chave simétrica usada para assinar o token JWT
-        public static string GenerateToken(string userId, string email, IConfiguration configuration)
+        public static string GenerateToken(string userId, string email, string role, IConfiguration configuration)
         {
             if (string.IsNullOrEmpty(userId))
                 throw new ArgumentNullException(nameof(userId), "User ID cannot be null or empty.");
             if (string.IsNullOrEmpty(email))
                 throw new ArgumentNullException(nameof(email), "Email cannot be null or empty.");
+            if (string.IsNullOrEmpty(role))
+                throw new ArgumentNullException(nameof(role), "Role cannot be null or empty.");
             if (configuration == null)
                 throw new ArgumentNullException(nameof(configuration), "Configuration cannot be null.");
 
@@ -26,6 +28,7 @@ namespace travel_agency_back.Utils
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId),
                 new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim(ClaimTypes.Role, role),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
             };
 

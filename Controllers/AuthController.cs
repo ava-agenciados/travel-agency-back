@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 using travel_agency_back.DTOs.Requests;
 using travel_agency_back.DTOs.Resposes;
 using travel_agency_back.Services;
 using travel_agency_back.Services.Interfaces;
-using travel_agency_back.Third_party.Mail;
 
 namespace travel_agency_back.Controllers
 {
@@ -53,6 +52,7 @@ namespace travel_agency_back.Controllers
                 userDTO.FirstName,
                 userDTO.LastName,
                 userDTO.Email,
+                userDTO.PhoneNumber,
                 userDTO.CPFPassport,
                 userDTO.Password
             );
@@ -142,7 +142,6 @@ namespace travel_agency_back.Controllers
             {
                 return Ok(new GenericResponseDTO(200, "Senha redefinida com sucesso!", true));
             }
-
             return BadRequest(new GenericResponseDTO(400, "Erro ao redefinir a senha", false));
         }   
     }

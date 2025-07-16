@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
-using travel_agency_back.Models;
-using travel_agency_back.Repositories.Interfaces;
-using System.Threading.Tasks;
-using System.Linq;
+﻿using travel_agency_back.Repositories.Interfaces;
 using travel_agency_back.Data;
+using travel_agency_back.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace travel_agency_back.Repositories
 {
@@ -14,6 +12,15 @@ namespace travel_agency_back.Repositories
         public UserRepository(ApplicationDBContext context)
         {
             _context = context;
+        }
+
+        public async Task<IEnumerable<Booking>> GetUserBookingsAsync(int userId)
+        {
+            var userBookings = await _context.UserBookings
+                .Where(ub => ub.UserId == userId)
+                .Include(ub => ub.Package)
+            .ToListAsync();
+            return userBookings;
         }
 
         public bool UserCPFPassportExists(string CPFPassport)

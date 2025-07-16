@@ -13,6 +13,8 @@ namespace travel_agency_back.Repositories.Interfaces
         /// 
         public bool UserCPFPassportExists(string CPFPassport);
 
+        public Task<IEnumerable<Booking>> GetUserBookingsAsync(int userId);
+
         //Pacotes do usuario
 
     }

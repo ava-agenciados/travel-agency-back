@@ -6,7 +6,7 @@ namespace travel_agency_back.Services.Interfaces
     public interface IAuthService
     {
         public Task<(SignInResult Result, string Token)> LoginWithTokenAsync(string email, string password);
-        public Task<IdentityResult> RegisterAsync(string firstname, string lastname, string email, string CPFPassport, string password);
+        public Task<IdentityResult> RegisterAsync(string firstname, string lastname, string email, string phonenumber, string CPFPassport, string password);
         public Task<bool> Logout(string token);
         Task GetUserByEmailAsync(string email);
 

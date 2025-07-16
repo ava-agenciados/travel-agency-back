@@ -27,27 +27,32 @@ namespace travel_agency_back.Services
             return (result, token);
         }
 
-        public async Task<IdentityResult> RegisterAsync(string firstname, string lastname, string email, string CPFPassport, string password)
+        public async Task<IdentityResult> RegisterAsync(string firstname, string lastname, string email, string phonenumber, string CPFPassport, string password)
         {
             var user = new User
             {
                 FirstName = firstname,
                 LastName = lastname,
                 Email = email,
+                UserName = email,
+                PhoneNumber = phonenumber,
                 CPFPassport = CPFPassport
             };
             return await _userService.RegisterAsync(
                 user.FirstName,
                 user.LastName,
                 user.Email,
+                user.PhoneNumber,
                 user.CPFPassport,
                 password
             );
         }
+
         public Task<bool> Logout(string token)
         {
             throw new NotImplementedException();
         }
+
         public async Task<(IdentityResult, string URL, bool emailSent)> GeneratePasswordResetTokenAsync(string email)
         {
             var (user, URL, emailSent) = await _userService.GeneratePasswordResetTokenAsync(email);
@@ -62,7 +67,6 @@ namespace travel_agency_back.Services
             }
             return (IdentityResult.Success, URL, emailSent);
         }
-
 
         public Task GetUserByEmailAsync(string email)
         {
@@ -81,6 +85,12 @@ namespace travel_agency_back.Services
             {
                 return IdentityResult.Failed();
             }
+
+
+
+
+        
+
             return IdentityResult.Success;
         }
     }

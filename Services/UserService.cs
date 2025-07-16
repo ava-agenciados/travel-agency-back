@@ -4,6 +4,7 @@ using travel_agency_back.Repositories.Interfaces;
 using travel_agency_back.Services.Interfaces;
 using travel_agency_back.Third_party.Mail;
 using travel_agency_back.Utils;
+using System.Security.Claims;
 
 namespace travel_agency_back.Services
 {
@@ -26,7 +27,7 @@ namespace travel_agency_back.Services
             _configuration = configuration;
         }
 
-        public Task<IdentityResult> RegisterAsync(string firstname, string lastname, string email, string CPFPassport, string password)
+        public async Task<IdentityResult> RegisterAsync(string firstname, string lastname, string email, string phonenumber, string CPFPassport, string password)
         {
             var user = new User
             {
@@ -34,39 +35,38 @@ namespace travel_agency_back.Services
                 LastName = lastname,
                 Email = email,
                 CPFPassport = CPFPassport,
-                UserName = email // Define o UserName como o email
+                UserName = email
             };
 
             if(_userRepository.UserCPFPassportExists(CPFPassport))
             {
-                // Se o CPF/Passaporte já existir, retorne um erro
-                return Task.FromResult(IdentityResult.Failed());
+                return IdentityResult.Failed();
             }
 
-    
-            var newUser = _userManager.CreateAsync(user, password);
-
-            if (newUser.IsFaulted)
+            var newUserResult = await _userManager.CreateAsync(user, password);
+            if (!newUserResult.Succeeded)
             {
-                // Se ocorrer um erro, retorne o resultado com o erro
-                return Task.FromResult(IdentityResult.Failed());
+                return IdentityResult.Failed();
             }
-            return newUser;
+            // Adiciona a role ao usuário
+            await _userManager.AddToRoleAsync(user, user.Role);
+            return IdentityResult.Success;
         }
+
         public async Task<(SignInResult Result, string Token)> LoginWithTokenAsync(string email, string password)
         {
-            // busco o usuário pelo email
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
                 return (SignInResult.Failed, null);
             }
-            
             var result = await _signInManager.PasswordSignInAsync(user, password, isPersistent: false, lockoutOnFailure: false);
             if (result.Succeeded)
             {
-                // Gera o token JWT aqui
-                var token = JWTGenerationToken.GenerateToken(user.Id, email, _configuration);
+                // Gera o token JWT com a role
+                var roles = await _userManager.GetRolesAsync(user);
+                var role = roles.FirstOrDefault() ?? user.Role;
+                var token = JWTGenerationToken.GenerateToken(user.Id.ToString(), email, role, _configuration);
                 return (SignInResult.Success, token);
             }
             return (SignInResult.Failed, null);
@@ -130,6 +130,22 @@ namespace travel_agency_back.Services
                 linkReset: resetUrl
             );
             return (IdentityResult.Success, resetUrl, true);
+        }
+
+        public async Task<IEnumerable<Booking>> GetAllUserBookingsAsync(ClaimsPrincipal principal)
+        {
+            var user = await _userManager.GetUserAsync(principal);
+            if (user == null)
+            {
+                throw new Exception("Usuário não encontrado");
+            }
+
+            var bookings = await _userRepository.GetUserBookingsAsync(user.Id);
+            if(bookings == null || !bookings.Any())
+            {
+                throw new Exception("Nenhuma reserva encontrada para o usuário");
+            }
+            return bookings;
         }
     }
 }
