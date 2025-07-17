@@ -1,4 +1,6 @@
-﻿namespace travel_agency_back.DTOs.Resposes
+﻿using travel_agency_back.DTOs.Resposes.Packages;
+
+namespace travel_agency_back.DTOs.Resposes
 {
     public class UserPackagesResponse
     {

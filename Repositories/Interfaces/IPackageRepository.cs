@@ -1,42 +1,30 @@
-﻿using travel_agency_back.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using travel_agency_back.Models;
 
 namespace travel_agency_back.Repositories.Interfaces
 {
     public interface IPackageRepository
     {
-        public void CreatePackage(Packages package);
-        public void UpdatePackage(int packageID);
+        //Funções CRUD para Pacotes
+        public Task<IActionResult> CreateNewPackageAsync(Packages package); // Cria um novo pacote
+        public Task<IActionResult> DeletePackageByIdAsync(int packageID);// Deleta um pacote pelo ID
+        public Task<IActionResult> UpdatePackageByIdAsync(int packageID, Packages package); // Atualiza um pacote pelo ID
 
-        public void DeletePackage(int packageID);
-        public Packages GetPackageById(int packageID);
+        public Task<IActionResult> SaveChangesAsync();
 
-        public List<Packages> GetAllPackages();
-        public List<Packages> GetPackagesByDestination(string destination);
-        public List<Packages> GetPackagesByPriceRange(decimal minPrice, decimal maxPrice);
+        //Funções de consulta
+        public Task<Packages> GetPackageByIdAsync(int packageID); // Retorna um pacote específico pelo ID
+        public Task<IEnumerable<Packages>> GetAllPackagesAsync(); // Retorna todos os pacotes
 
-        public List<Packages> GetPackagesByActiveDate(DateTime activeFrom, DateTime activeUntil);
-        public List<Packages> GetPackagesByBeginDate(DateTime beginDate);
-        public List<Packages> GetPackagesByEndDate(DateTime endDate); 
-        public List<Packages> GetPackagesByOrigin(string origin);
-        public List<Packages> GetPackagesByName(string name);
-        public List<Packages> GetPackagesByDescription(string description);
-        public List<Packages> GetPackagesByQuantity(int quantity);
-        public List<Packages> GetPackagesByIsAvailable(bool isAvailable);
-        public List<Packages> GetPackagesByCreatedAt(DateTime createdAt);
+        public Task<List<Packages>> GetPackagesByFilter(string? origin, string? destination, DateTime? startDate, DateTime? endDate);
 
-        public void SetPackageAvailability(int packageID, bool isAvailable);
-        public void AddPackageMedia(int packageID, string mediaUrl);
-        public void RemovePackageMedia(int packageID, string mediaUrl);
-        public List<Packages> GetPackagesByRating(int rating);
-        public List<Packages> GetPackagesByRatingRange(int minRating, int maxRating);
+        public Task<List<Packages>> GetMostLovedPackages();
 
-        public List<Rating> GetCommentsByPackageId(int packageID);
-        public List<Rating> GetCommentsFromAllPackages();
 
-        //Funções cliente
-        public void AddRatingToPackage(int packageID, Rating rating);
-        public void UpdateRating(int ratingID, Rating updatedRating);
-        public void DeleteRating(int ratingID);
-        Task<IEnumerable<Packages>> GetAllAvailablePackagesAsync();
+        public Task<List<string>> GetAllDestinations();
+
+
+
+
     }
 }

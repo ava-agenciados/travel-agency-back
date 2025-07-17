@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using travel_agency_back.Data;
 using travel_agency_back.Models;
 using travel_agency_back.Repositories.Interfaces;
@@ -12,218 +14,152 @@ namespace travel_agency_back.Repositories
         {
             _context = context;
         }
-        public void AddPackageMedia(int packageID, string mediaUrl)
+
+        public async Task<IActionResult> CreateNewPackageAsync(Packages package)
         {
-            var package = _context.Packages.Find(packageID);
-            if (package == null)
+            var newPackage = new Packages
             {
-                throw new ArgumentException("Package not found");
-            }
-            var packageMedia = new PackageMedia
-            {
-                PackageId = packageID,
-                ImageURL = mediaUrl,
+                Name = package.Name,
+                Description = package.Description,
+                Origin = package.Origin,
+                Destination = package.Destination,
+                Price = package.Price,
+                ActiveFrom = package.ActiveFrom,
+                ActiveUntil = package.ActiveUntil,
+                BeginDate = package.BeginDate,
+                EndDate = package.EndDate,
+                Quantity = package.Quantity,
+                IsAvailable = package.IsAvailable,
+                ImageUrl = package.ImageUrl,
+                Bookings = new List<Booking>(),
+                Ratings = new List<Rating>(),
+                PackageMedia = package.PackageMedia?.Select(pm => new PackageMedia { ImageURL = pm.ImageURL, MediaType = pm.MediaType }).ToList(),
                 CreatedAt = DateTime.UtcNow
             };
-            _context.PackageMedias.Add(packageMedia);
+            _context.Packages.Add(newPackage);
+            _context.SaveChanges();
+            return await Task.FromResult<IActionResult>(new OkObjectResult(newPackage));
         }
 
-        public void AddRatingToPackage(int packageID, Rating rating)
-        {
-            
-            
-        }
-
-        public void CreatePackage(Packages package)
-        {
-            var existingPackage = _context.Packages.FirstOrDefault(p => p.Name == package.Name && p.Destination == package.Destination);
-            if (existingPackage != null)
-            {
-                throw new ArgumentException("Package with the same name and destination already exists.");
-            }
-            package.CreatedAt = DateTime.UtcNow;
-            _context.Packages.Add(package);
-        }
-
-        public void DeletePackage(int packageID)
+        public async Task<IActionResult> DeletePackageByIdAsync(int packageID)
         {
             var package = _context.Packages.Find(packageID);
             if (package == null)
             {
-                throw new ArgumentException("Package not found");
+                return await Task.FromResult<IActionResult>(new NotFoundObjectResult(new { Message = "Pacote não encontrado" }));
             }
             _context.Packages.Remove(package);
+            _context.SaveChanges();
+            return await Task.FromResult<IActionResult>(new OkObjectResult(new { Message = "Pacote deletado com sucesso" }));
         }
 
-        public void DeleteRating(int ratingID)
+        public async Task<List<string>> GetAllDestinations()
         {
-            var rating = _context.Ratings.Find(ratingID);
-            if (rating == null)
-            {
-                throw new ArgumentException("Rating not found");
-            }
-            _context.Ratings.Remove(rating);
+            return await _context.Packages
+                .Select(p => p.Destination)
+                .Distinct()
+                .ToListAsync();
         }
 
-        public async Task<IEnumerable<Packages>> GetAllAvailablePackagesAsync()
+        public async Task<IEnumerable<Packages>> GetAllPackagesAsync()
         {
             var packages = await _context.Packages
+                .Include(p => p.Bookings)
+                .Include(p => p.Ratings)
+                .Include(p => p.PackageMedia)
                 .Where(p => p.IsAvailable)
                 .ToListAsync();
             return packages;
         }
 
-        public List<Packages> GetAllPackages()
+        public async Task<List<Packages>> GetMostLovedPackages()
         {
-            var packages = _context.Packages.ToList();
-            return packages;
+            return await _context.Packages
+                .Include(p => p.Ratings)
+                .Include(p => p.PackageMedia)
+                .Include(p => p.Bookings)
+                .Where(p => p.Ratings.Any()) // Apenas pacotes com avaliações
+                .OrderByDescending(p => p.Ratings.Average(r => r.Stars))
+                .ThenByDescending(p => p.Ratings.Count)
+                .Take(10) // Retorna os 10 mais amados
+                .ToListAsync();
         }
 
-        public List<Rating> GetCommentsByPackageId(int packageID)
+        public async Task<Packages> GetPackageByIdAsync(int packageID)
         {
-            var package = _context.Packages.Find(packageID);
+            var package = await _context.Packages
+                .Include(p => p.Bookings)
+                .Include(p => p.Ratings)
+                .Include(p => p.PackageMedia)
+                .Where(p => p.IsAvailable)
+                .FirstOrDefaultAsync(p => p.Id == packageID);
             if (package == null)
             {
-                throw new ArgumentException("Package not found");
-            }
-            var ratings = _context.Ratings.Where(r => r.PackageId == packageID).ToList();
-            return ratings;
-        }
-
-        public List<Rating> GetCommentsFromAllPackages()
-        {
-            var ratings = _context.Ratings.ToList();
-            return ratings;
-        }
-
-        public Packages GetPackageById(int packageID)
-        {
-            var package = _context.Packages.Find(packageID);
-            if (package == null)
-            {
-                throw new ArgumentException("Package not found");
+                return null;
             }
             return package;
         }
 
-        public List<Packages> GetPackagesByActiveDate(DateTime activeFrom, DateTime activeUntil)
+        public async Task<List<Packages>> GetPackagesByFilter(string? origin, string? destination, DateTime? startDate, DateTime? endDate)
         {
-            var packages = _context.Packages
-                .Where(p => p.ActiveFrom >= activeFrom && p.ActiveUntil <= activeUntil)
-                .ToList();
-            return packages;
+            var query = _context.Packages
+                .Include(p => p.Bookings)
+                .Include(p => p.Ratings)
+                .Include(p => p.PackageMedia)
+                .Where(p => p.IsAvailable)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(origin))
+                query = query.Where(p => p.Origin == origin);
+
+            if (!string.IsNullOrEmpty(destination))
+                query = query.Where(p => p.Destination == destination);
+
+            if (startDate.HasValue)
+                query = query.Where(p => p.BeginDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(p => p.EndDate <= endDate.Value);
+
+            return await query.ToListAsync();
         }
 
-        public List<Packages> GetPackagesByBeginDate(DateTime beginDate)
+        public async Task<IActionResult> SaveChangesAsync()
         {
-            throw new NotImplementedException();
-        }
-
-        public List<Packages> GetPackagesByCreatedAt(DateTime createdAt)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Packages> GetPackagesByDescription(string description)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Packages> GetPackagesByDestination(string destination)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Packages> GetPackagesByEndDate(DateTime endDate)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Packages> GetPackagesByIsAvailable(bool isAvailable)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Packages> GetPackagesByName(string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Packages> GetPackagesByOrigin(string origin)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Packages> GetPackagesByPriceRange(decimal minPrice, decimal maxPrice)
-        {
-            var packages = _context.Packages
-                .Where(p => p.Price >= minPrice && p.Price <= maxPrice)
-                .ToList();
-            return packages;
-        }
-
-        public List<Packages> GetPackagesByQuantity(int quantity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Packages> GetPackagesByRating(int rating)
-        {
-            throw new NotImplementedException();
-        }
-
-        public List<Packages> GetPackagesByRatingRange(int minRating, int maxRating)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemovePackageMedia(int packageID, string mediaUrl)
-        {
-            var packageMedia = _context.PackageMedias
-                .FirstOrDefault(pm => pm.PackageId == packageID && pm.ImageURL == mediaUrl);
-        }
-
-        public void SetPackageAvailability(int packageID, bool isAvailable)
-        {
-            var package = _context.Packages.Find(packageID);
-            if (package == null)
+            var result = await _context.SaveChangesAsync();
+            if (result > 0)
             {
-                throw new ArgumentException("Package not found");
+                return new OkObjectResult(new { Message = "Alterações salvas com sucesso." });
             }
-            package.IsAvailable = isAvailable;
-        }
-
-        public void UpdatePackage(int packageID, Packages packages)
-        {
-            var package = _context.Packages.Find(packageID);
-            if (package == null)
+            else
             {
-                throw new ArgumentException("Package not found");
+                return new BadRequestObjectResult(new { Message = "Nenhuma alteração foi realizada." });
             }
-            package.Name = packages.Name;
-            package.Description = packages.Description;
-            package.Price = packages.Price;
-            package.ImageUrl = packages.ImageUrl;
-            package.ActiveFrom = packages.ActiveFrom;
-            package.ActiveUntil = packages.ActiveUntil;
-            package.BeginDate = packages.BeginDate;
-            package.EndDate = packages.EndDate;
-            package.Origin = packages.Origin;
-            package.Destination = packages.Destination;
-            package.Quantity = packages.Quantity;
-            package.IsAvailable = packages.IsAvailable;
-            package.CreatedAt = packages.CreatedAt;
-            _context.Packages.Update(package);
         }
 
-        public void UpdatePackage(int packageID)
+        public async Task<IActionResult> UpdatePackageByIdAsync(int packageID, Packages package)
         {
-            throw new NotImplementedException();
-        }
-
-        public void UpdateRating(int ratingID, Rating updatedRating)
-        {
-            throw new NotImplementedException();
+            var existingPackage = _context.Packages.Find(packageID);
+            if (existingPackage == null)
+            {
+                return await Task.FromResult<IActionResult>(new NotFoundObjectResult(new { Message = "Pacote não encontrado" }));
+            }
+            existingPackage.Name = package.Name;
+            existingPackage.Description = package.Description;
+            existingPackage.Origin = package.Origin;
+            existingPackage.Destination = package.Destination;
+            existingPackage.Price = package.Price;
+            existingPackage.ActiveFrom = package.ActiveFrom;
+            existingPackage.ActiveUntil = package.ActiveUntil;
+            existingPackage.BeginDate = package.BeginDate;
+            existingPackage.EndDate = package.EndDate;
+            existingPackage.Quantity = package.Quantity;
+            existingPackage.IsAvailable = package.IsAvailable;
+            existingPackage.ImageUrl = package.ImageUrl;
+            existingPackage.PackageMedia = package.PackageMedia?.Select(pm => new PackageMedia { ImageURL = pm.ImageURL, MediaType = pm.MediaType }).ToList() ?? new List<PackageMedia>();
+            _context.Packages.Update(existingPackage);
+            _context.SaveChanges();
+            return await Task.FromResult<IActionResult>(new OkObjectResult(existingPackage));
         }
     }
 }

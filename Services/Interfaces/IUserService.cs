@@ -12,10 +12,10 @@ namespace travel_agency_back.Services.Interfaces
 
         public Task<User> GetUserByEmailAsync(string email);
 
+        public Task<(IdentityResult, string URL, bool emailSent)> GeneratePasswordResetTokenAsync(string email);
+
 
         public Task<IEnumerable<Booking>> GetAllUserBookingsAsync(ClaimsPrincipal principal);
-
-        public Task<(IdentityResult, string URL, bool emailSent)> GeneratePasswordResetTokenAsync(string email);
 
     }
 }

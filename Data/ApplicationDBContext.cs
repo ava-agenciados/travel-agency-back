@@ -26,13 +26,13 @@ namespace travel_agency_back.Data
         {
         }
         public DbSet<UserDocument> UserDocuments { get; set; } // DbSet para a entidade UserDocument
-        public DbSet<Rating> Ratings { get; set; } // DbSet para a entidade Rating
+        public DbSet<Rating> Rating { get; set; } // DbSet para a entidade Rating
         public DbSet<Booking> Bookings { get; set; } // DbSet para a entidade Booking
         public DbSet<Companions> Companions { get; set; } // DbSet para a entidade Companions
         public DbSet<Payments> Payments { get; set; } // DbSet para a entidade Payments
         public DbSet<PaymentLogs> PaymentLogs { get; set; } // DbSet para a entidade PaymentLogs
         public DbSet<Booking> UserBookings { get; set; } // DbSet para a entidade UserBooking
-        public DbSet<PackageMedia> PackageMedias { get; set; } // DbSet para a entidade PackageMedia
+        public DbSet<PackageMedia> PackageMedia { get; set; } // DbSet para a entidade PackageMedia
         public DbSet<Packages> Packages { get; set; } // DbSet para a entidade Packages  
         protected override void OnModelCreating(ModelBuilder builder)
         {

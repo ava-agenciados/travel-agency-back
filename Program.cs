@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens; // Adicionado para JWT
 using Microsoft.OpenApi.Models; // Necessário para configuração do Swagger com JWT
 using System.Text; // Adicionado para JWT
@@ -58,8 +59,17 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPackageService, PackageService>();
 builder.Services.AddScoped<IPackageRepository, PackageRepository>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<AuthService>(); // Registra o AuthService para ser injetado nos controllers
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
+/*
+ * builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+});
+ * */
 
 // Configura o ASP.NET Core Identity para usar a entidade User personalizada e roles (IdentityRole).
 // Define que não é necessário confirmar a conta por e-mail para autenticação.
