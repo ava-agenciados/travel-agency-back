@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using travel_agency_back.DTOs.Requests.Booking;
 using travel_agency_back.DTOs.Requests.Packages;
 using travel_agency_back.DTOs.Resposes;
@@ -43,8 +44,14 @@ namespace travel_agency_back.Controllers
             _adminService = adminService;
             _userService = userService;
         }
-
-
+        /// <summary>
+        /// Retorna todos os pacotes disponíveis.
+        /// </summary>
+        /// <remarks>Endpoint para listar pacotes disponíveis para compra.</remarks>
+        [SwaggerOperation(
+            Summary = "Retorna todos os pacotes disponíveis - Rota livre sem autenticação",
+            Description = "Endpoint para listar pacotes disponíveis para compra."
+        )]
         [HttpGet("packages")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllAvaliablePackages()
@@ -80,7 +87,10 @@ namespace travel_agency_back.Controllers
             });
             return Ok(response);
         }
-
+        [SwaggerOperation(
+            Summary = "Retorna um pacote com base no seu ID - Rota livre sem autenticação",
+            Description = "Endpoint para retornar pacote por seu respectivo ID."
+        )]
         [HttpGet("packages/{packageId}")]
         public async Task<IActionResult> GetPackageByIdUser(int packageId)
         {
@@ -114,7 +124,10 @@ namespace travel_agency_back.Controllers
             };
             return Ok(response);
         }
-
+        [SwaggerOperation(
+            Summary = "Retorna que retorna pacotes com base em seu filtro de pesquisa(origem, destino, datas) - Rota livre sem autenticação",
+            Description = "Endpoint para retornar pacotes com base em filtros"
+        )]
         [HttpGet("packages/search")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> PackageSearch([FromQuery] PackageSearchRequestDTO packageSearchDTO)
@@ -154,78 +167,6 @@ namespace travel_agency_back.Controllers
                     MediaUrl = pm.MediaUrl
                 }).ToList()
             });
-            return Ok(response);
-        }
-
-        /*
-         
-                    ROTAS ADMIN  E ATENDENTE
-         
-         */
-
-        //Rotas Admin, Atendente
-        //Cria um novo pacote
-        [HttpPost("dashboard/packages/create")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateNewPackage([FromBody] CreateNewPackageDTO packageRequestDTO)
-        {
-            if (packageRequestDTO == null)
-            {
-                return BadRequest(new GenericResponseDTO(400, "Dados inválidos", false));
-            }
-            var response = await _adminService.CreatePackageAsync(packageRequestDTO);
-            if (response == null)
-            {
-                return BadRequest(new GenericResponseDTO(500, "Erro ao criar pacote", false));
-            }
-            return Ok(new GenericResponseDTO(200, "Pacote criado com sucesso!.", true));
-        }
-
-        //Deleta um pacote específico pelo ID
-        [HttpPost("dashboard/packages/delete/{packageID}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeletePackage(int packageID)
-        {
-            if (packageID <= 0)
-            {
-                return BadRequest(new GenericResponseDTO(404, "ID do pacote inválido", false));
-            }
-            var response = await _adminService.DeletePackageAsync(packageID);
-            if (response == null)
-            {
-                return NotFound(new GenericResponseDTO(404, "Pacote não encontrado", false));
-            }
-            return Ok(new GenericResponseDTO(200, "Pacote deletado com sucesso!", true));
-        }
-
-        //Atualiza um pacote específico pelo ID
-        [HttpPut("dashboard/packages/update/{packageId}")]
-        [Authorize(Roles = "Admin, Atendente")]
-        public async Task<IActionResult> UpdatePackage(int packageId, [FromBody] UpdatePackageDTO dto)
-        {
-            var result = await _adminService.UpdatePackageByIdAsync(packageId, dto);
-            if (result is NotFoundObjectResult)
-                return NotFound();
-            return Ok(new GenericResponseDTO(200, "Pacote atualizado com sucesso!", true));
-        }
-
-        //Retorna todos os pacotes disponíveis
-        [HttpGet("dashboard/packages/all")]
-        [Authorize(Roles = "Admin, Atendente")]
-        public async Task<IActionResult> GetAllPackages()
-        {
-            var response = await _adminService.GetAllPackagesAsync();
-            return Ok(response);
-        }
-
-        //Retorna um pacote específico pelo ID
-        [HttpGet("dashboard/packages/{packageId}")]
-        [Authorize(Roles = "Admin, Atendente")]
-        public async Task<IActionResult> GetPackageById(int packageId)
-        {
-            var response = await _adminService.GetPackageByIdAsync(packageId);
-            if (response == null)
-                return NotFound();
             return Ok(response);
         }
     }

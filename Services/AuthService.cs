@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using travel_agency_back.Models;
 using travel_agency_back.Services.Interfaces;
+using travel_agency_back.Third_party.Mail;
 
 namespace travel_agency_back.Services
 {
@@ -65,6 +66,7 @@ namespace travel_agency_back.Services
             {
                 return (IdentityResult.Failed(), null, false);
             }
+          
             return (IdentityResult.Success, URL, emailSent);
         }
 

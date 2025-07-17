@@ -14,35 +14,29 @@ namespace travel_agency_back.Services
     {
         private readonly IBookingRepository _bookingRepository;
         private readonly IPackageRepository _packageRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly ILogger<BookingService> _logger;
 
-        public BookingService(IBookingRepository bookingRepository)
+        public BookingService(IBookingRepository bookingRepository, IPackageRepository packageRepository, IUserRepository userRepository, ILogger<BookingService> logger)
         {
             _bookingRepository = bookingRepository;
+            _packageRepository = packageRepository;
+            _userRepository = userRepository;
+            _logger = logger;
         }
 
-        public async Task<IActionResult> CreateUserBookingAsync(int userId, string userEmail, int packageId, ICollection<string> payment, CreateNewBookingDTO createNewBooking)
-        { 
-            var paymentMethod = createNewBooking.PaymentMethods?.FirstOrDefault();
-            var status = "Pendente";
-            switch (paymentMethod.PaymentMethod)
-            {
-                case PaymentMethod.CreditCard:
-                case PaymentMethod.DebitCard:
-                    status = "Recusado";
-              
-                    break;
-                case PaymentMethod.Boleto:
-                    status = "Pendente";
-                    break;
-                case PaymentMethod.Pix:
-                    status = "Confirmado";
-                    break;
-            }
+        public async Task<IActionResult> CreateUserBookingAsync(int userId, CreateNewBookingDTO createNewBooking)
+        {
+            var paymentMethods = createNewBooking.PaymentMethods?.Select(p => p.PaymentMethod.ToString()).ToList() ?? new List<string>();
+            var payment = createNewBooking.PaymentMethods?.FirstOrDefault();
+            var userInfo = await _userRepository.GetUserByIdAsync(userId);
+
+
             var booking = new Booking
             {
                 PackageId = createNewBooking.PackageID,
                 TravelDate = createNewBooking.StartTravel,
-                Status = status,
+                Status = "",
                 Companions = createNewBooking.Companions?.Select(c => new Companions
                 {
                     FullName = $"{c.FirstName} {c.LastName}",
@@ -51,10 +45,22 @@ namespace travel_agency_back.Services
                 Payments = createNewBooking.PaymentMethods?.Select(p => new Payments
                 {
                     PaymentMethod = p.PaymentMethod.ToString(),
+                    PaymentDate = DateTime.UtcNow,
+
                 }).ToList() ?? new List<Payments>()
             };
-            var package = await  _packageRepository.GetPackageByIdAsync(packageId);
 
+            var package = await _packageRepository.GetPackageByIdAsync(booking.PackageId);
+            if (package == null)
+            {
+               
+                return new NotFoundObjectResult(new GenericResponseDTO(404, "Pacote não encontrado", false));
+            }
+            if (userInfo == null)
+            {
+
+                return new NotFoundObjectResult(new GenericResponseDTO(404, "Usuário não encontrado", false));
+            }
             var packageResponse = new PackageDTO
             {
                 Id = package.Id,
@@ -71,11 +77,76 @@ namespace travel_agency_back.Services
                 IsAvailable = package.IsAvailable,
                 ImageUrl = package.ImageUrl,
             };
-
-            var result = await _bookingRepository.CreateUserBookingAsync(userId, packageId, payment, booking);
-            if (result is OkObjectResult)
-            { 
-                await EmailService.SendPaymentConfirmation()
+           
+            switch (payment.PaymentMethod)
+            {
+                case PaymentMethod.Pix:
+                    booking.Status = "Aprovado";
+                    booking.Payments.FirstOrDefault().Status = "Aprovado";
+                    await EmailService.SendPixPaymentConfirmation(userInfo, createNewBooking.PaymentMethods?.FirstOrDefault(), package, booking, _logger);
+                    break;
+                case PaymentMethod.Boleto:
+                    booking.Status = "Pendente";
+                    booking.Payments.FirstOrDefault().Status = "Pendente";
+                    EmailService.SendBoletoEmail(
+                        userInfo.Email,
+                        userInfo.FirstName,
+                        userInfo.LastName,
+                        userInfo.CPFPassport,
+                        package.Price,
+                        package.Name,
+                        package.Destination,
+                        package.Origin,
+                        booking.TravelDate,
+                        booking.TravelDate // ou outro campo de fim
+                    );
+                    break;
+                case PaymentMethod.CreditCard:
+                    booking.Status = "Recusado";
+                    booking.Payments.FirstOrDefault().Status = "Recusado";
+                    EmailService.SendCartaoEmail(
+                        userInfo.Email,
+                        payment.FirstName,
+                        payment.LastName,
+                        payment.CPFPassport,
+                        package.Price,
+                        package.Name,
+                        package.Destination,
+                        package.Origin,
+                        booking.TravelDate,
+                        booking.TravelDate, // ou outro campo de fim
+                        payment.Installments, // parcelas, ajuste conforme necessário
+                        "Recusado", // status, ajuste conforme necessário
+                        payment.TransactionId.ToString()
+                    );
+                    break;
+                case PaymentMethod.DebitCard:
+                    booking.Status = "Recusado";
+                    booking.Payments.FirstOrDefault().Status = "Recusado";
+                    EmailService.SendCartaoEmail(
+                        userInfo.Email,
+                        payment.FirstName,
+                        payment.LastName,
+                        payment.CPFPassport,
+                        package.Price,
+                        package.Name,
+                        package.Destination,
+                        package.Origin,
+                        booking.TravelDate,
+                        booking.TravelDate, // ou outro campo de fim
+                        1, // parcelas, ajuste conforme necessário
+                        "Recusado", // status, ajuste conforme necessário
+                        payment.TransactionId.ToString()
+                    );
+                    break;
+                default:
+                    _logger.LogWarning("Método de pagamento não reconhecido para envio de e-mail.");
+                    break;
+            }
+            var result = await _bookingRepository.CreateUserBookingAsync(userId, booking.PackageId, booking);
+            
+            if (result is OkObjectResult && payment != null)
+            {
                 return new OkObjectResult(new GenericResponseDTO(200, "Reserva criada com sucesso", true));
             }
             return new ObjectResult(new GenericResponseDTO(500, "Falha ao gerar reserva de viagem", false));

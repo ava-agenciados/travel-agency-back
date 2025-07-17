@@ -11,7 +11,7 @@ namespace travel_agency_back.Repositories.Interfaces
         public Task<Booking> GetUserBookingByIdAsync(int userId, int bookingId);
 
         //Funções Set/Create
-        public Task<IActionResult> CreateUserBookingAsync(int userId, string userEmail, int packageId, ICollection<string> payment, Booking booking);
+        public Task<IActionResult> CreateUserBookingAsync(int userId, int packageId, Booking booking);
         public Task UpdateUserBookingAsync(int userId, Booking booking);
         public Task DeleteUserBookingAsync(int userId, int bookingId);
     }

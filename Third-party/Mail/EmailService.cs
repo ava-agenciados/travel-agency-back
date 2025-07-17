@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Mail;
+using System.Runtime.ConstrainedExecution;
 using travel_agency_back.DTOs.Requests.Booking;
 using travel_agency_back.DTOs.Resposes.Packages;
 using travel_agency_back.Models;
@@ -10,83 +12,7 @@ namespace travel_agency_back.Third_party.Mail
 {
     public class EmailService
     {
-        private string EMAILPIX = $@"
-<!DOCTYPE html>
-<html lang='pt-br'>
-<head>
-    <meta charset='UTF-8'>
-    <title>PIX Aprovado - Viagem Confirmada</title>
-</head>
-<body style='background-color:#f5f5f5;padding:20px;'>
-    <div style='max-width:600px;margin:0 auto;background-color:#fff;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);'>
-        <div style='background-color:#2563eb;padding:20px;text-align:center;color:white;'>
-            <div style='font-weight:bold;font-size:24px;'>NEWHORIZON</div>
-            <div style='font-size:12px;letter-spacing:2px;'>AGÊNCIA DE VIAGENS</div>
-        </div>
-        <div style='padding:30px;color:#333;'>
-            <h1 style='color:#2563eb;margin-bottom:20px;font-size:22px;'>🔥 PIX - Confirmação Instantânea</h1>
-            <p>Olá {FirstName} {LastName},</p>
-            <p>Sua reserva foi <strong style='color:#28a745;'>CONFIRMADA COM SUCESSO</strong> via PIX!</p>
-            
-            <div style='background-color:#e8f5e8;border:2px solid #28a745;border-radius:8px;padding:20px;margin:20px 0;'>
-                <div style='text-align:center;margin-bottom:15px;'>
-                    <span style='font-size:48px;'>✅</span>
-                    <h2 style='color:#28a745;margin:10px 0;'>PAGAMENTO APROVADO</h2>
-                </div>
-                <p><strong>Valor Pago:</strong> R$ {Amount:N2}</p>
-                <p><strong>Data/Hora:</strong> {DateTime.UtcNow:dd/MM/yyyy HH:mm:ss}</p>
-                <p><strong>ID da Transação:</strong> {pixCode}</p>
-                <p style='color:#28a745;text-align:center;font-weight:bold;'>✨ Processamento instantâneo via PIX ✨</p>
-            </div>
-
-            <div style='margin:20px 0;'>
-                <h2 style='color:#2563eb;'>🎒 Detalhes da Viagem Confirmada</h2>
-                <div style='background-color:#f8f9fa;padding:15px;border-radius:5px;border-left:4px solid #2563eb;'>
-                    <p><strong>Pacote:</strong> {NomePacotes}</p>
-                    <p><strong>Origem:</strong> {Origem}</p>
-                    <p><strong>Destino:</strong> {Destino}</p>
-                    <p><strong>Data de Início:</strong> {InicioViagem:dd/MM/yyyy}</p>
-                    <p><strong>Data de Término:</strong> {FimViagem:dd/MM/yyyy}</p>
-                    <p><strong>Viajante:</strong> {FirstName} {LastName}</p>
-                    <p><strong>Documento:</strong> {CPFPassport}</p>
-                </div>
-            </div>
-
-            <div style='text-align:center;margin:25px 0;'>
-                <a href='#' style='display:inline-block;background-color:#2563eb;color:white !important;text-decoration:none;padding:12px 30px;border-radius:5px;font-weight:bold;margin:10px;'>📱 Ver Voucher Digital</a>
-                <a href='#' style='display:inline-block;background-color:#28a745;color:white !important;text-decoration:none;padding:12px 30px;border-radius:5px;font-weight:bold;margin:10px;'>📧 Enviar por WhatsApp</a>
-            </div>
-
-            <div style='background-color:#fff3cd;border:1px solid #ffeaa7;border-radius:5px;padding:15px;margin:20px 0;'>
-                <h3 style='color:#856404;margin-top:0;'>📋 Próximos Passos:</h3>
-                <ul style='color:#856404;margin:0;'>
-                    <li>✅ Guarde este e-mail como comprovante</li>
-                    <li>📄 Prepare a documentação necessária para a viagem</li>
-                    <li>📞 Fique atento aos nossos contatos próximo à data da viagem</li>
-                    <li>🎯 Em caso de dúvidas, entre em contato conosco</li>
-                </ul>
-            </div>
-
-            <p style='color:#28a745;font-weight:bold;text-align:center;font-size:18px;'>🎉 Boa viagem e obrigado por escolher a NewHorizon!</p>
-            
-            <div style='margin-top:20px;font-size:14px;'>
-                <p>Caso tenha qualquer dúvida, nossa equipe de suporte está disponível para ajudar:</p>
-                <p><strong>Email:</strong> suporte@newhorizon.com</p>
-                <p><strong>Telefone:</strong> (11) 1234-5678</p>
-                <p><strong>WhatsApp:</strong> (11) 91234-5678</p>
-            </div>
-        </div>
-        <div style='background-color:#f0f0f0;padding:15px;text-align:center;font-size:12px;color:#666;'>
-            <p>&copy; 2024 NewHorizon Agência de Viagens. Todos os direitos reservados.</p>
-            <p>Endereço: Av. Boa Viagem, 456, Recife - PE | CNPJ: 12.345.678/0001-90</p>
-        </div>
-    </div>
-</body>
-</html>
-";
-
-
-        public int _smtPort { get; set; } = 587;
+        private static int _smtPort { get; set; } = 587;
         private static string _smtpUser { get; set; } = "noreplyagenciaviagens@gmail.com";
         private static string _smtpPassword = "aron zbty muks wzyu";
 
@@ -287,39 +213,43 @@ namespace travel_agency_back.Third_party.Mail
             smtp.Send(mail);
         }
 
-        public static async Task<IActionResult> SendPaymentConfirmation(User user, CreateNewBookingDTO createNewBooking, PaymentDTO paymentDTO, PackageDTO package)
+        public static async Task<IActionResult> SendPixPaymentConfirmation(User user, PaymentDTO payment, Packages packages, Booking booking, ILogger logger)
         {
             //Configura o e-mail e o corpo da mensagem
             MailMessage mail = new MailMessage();
             mail.From = new MailAddress(_smtpUser);
-            mail.To.Add(user.Email);
-            if(paymentDTO.PaymentMethod == PaymentMethod.Pix)
-            {
-                mail.Subject = "✅ PIX Aprovado - Viagem Confirmada - NewHorizon";
-                mail.Body = GetPixEmailBody(
-                user.FirstName, // do objeto User
-                user.LastName,  // do objeto User
-                user.CPFPassport, // do objeto User
-                paymentDTO.Amout, // do objeto PaymentDTO (valor pago)
-                package.Name, // do objeto PackageDTO (nome do pacote)
-                package.Destination, // do objeto PackageDTO (destino)
-                package.Origin, // do objeto PackageDTO (origem)
-                createNewBooking.StartTravel, // do objeto CreateNewBookingDTO (data início)
-                createNewBooking.EndTravel,   // do objeto CreateNewBookingDTO (data fim)
-                paymentDTO.TransactionId.ToString() // do objeto PaymentDTO (id da transação PIX)
-);
-            }
-
+            mail.To.Add(addresses: user.Email);
+            mail.Subject = "✅ PIX Aprovado - Viagem Confirmada - NewHorizon";
+            mail.Body = GetPixEmailBody(
+            user.FirstName, // do objeto User
+            user.LastName,  // do objeto User
+            user.CPFPassport, // do objeto User
+            payment.Amout, // do objeto PaymentDTO (valor pago)
+            packages.Name, // do objeto PackageDTO (nome do pacote)
+            packages.Destination, // do objeto PackageDTO (destino)
+            packages.Origin, // do objeto PackageDTO (origem)
+            booking.TravelDate, // do objeto CreateNewBookingDTO (data início)
+            booking.BookingDate,   // do objeto CreateNewBookingDTO (data fim)
+            payment.TransactionId.ToString()); // do objeto PaymentDTO (id da transação PIX)
+            mail.IsBodyHtml = true;
+          
             //Configura o SMTP client
             SmtpClient smtp = new SmtpClient(host: "smtp.gmail.com", 587);
             smtp.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
             smtp.EnableSsl = true;
 
             // Envia o e-mail
-            var result = smtp.SendMailAsync(mail);
-            if (result == null)
+            try
             {
-                throw new Exception("Erro ao enviar o e-mail de confirmação do PIX.");
+                var result  = smtp.SendMailAsync(mail);
+                if(result.IsCompletedSuccessfully)
+                    logger?.LogInformation("E-mail enviado com sucesso para {0}", user.Email);
+                else
+                    logger?.LogWarning("E-mail não enviado para {0}", user.Email);
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, "Erro ao enviar e-mail para {0}", user.NormalizedEmail);
             }
             return new OkObjectResult(new { message = "E-mail de confirmação do PIX enviado com sucesso!" });
         }
@@ -563,7 +493,7 @@ namespace travel_agency_back.Third_party.Mail
         </div>
         <div style='padding:30px;color:#333;'>
             <h1 style='color:#2563eb;margin-bottom:20px;font-size:22px;'>🔥 PIX - Confirmação Instantânea</h1>
-            <p>Olá {{FirstName}} {{LastName}},</p>
+            <p>Olá {FirstName} {LastName},</p>
             <p>Sua reserva foi <strong style='color:#28a745;'>CONFIRMADA COM SUCESSO</strong> via PIX!</p>
             
             <div style='background-color:#e8f5e8;border:2px solid #28a745;border-radius:8px;padding:20px;margin:20px 0;'>
@@ -571,22 +501,22 @@ namespace travel_agency_back.Third_party.Mail
                     <span style='font-size:48px;'>✅</span>
                     <h2 style='color:#28a745;margin:10px 0;'>PAGAMENTO APROVADO</h2>
                 </div>
-                <p><strong>Valor Pago:</strong> R$ {{Amount:N2}}</p>
-                <p><strong>Data/Hora:</strong> {{DateTime.UtcNow:dd/MM/yyyy HH:mm:ss}}</p>
-                <p><strong>ID da Transação:</strong> {{pixCode}}</p>
+                <p><strong>Valor Pago:</strong> R$ {Amount}</p>
+                <p><strong>Data/Hora:</strong> {DateTime.UtcNow:dd/MM/yyyy HH:mm:ss}</p>
+                <p><strong>ID da Transação:</strong> {Guid.NewGuid()}</p>
                 <p style='color:#28a745;text-align:center;font-weight:bold;'>✨ Processamento instantâneo via PIX ✨</p>
             </div>
 
             <div style='margin:20px 0;'>
                 <h2 style='color:#2563eb;'>🎒 Detalhes da Viagem Confirmada</h2>
                 <div style='background-color:#f8f9fa;padding:15px;border-radius:5px;border-left:4px solid #2563eb;'>
-                    <p><strong>Pacote:</strong> {{NomePacotes}}</p>
-                    <p><strong>Origem:</strong> {{Origem}}</p>
-                    <p><strong>Destino:</strong> {{Destino}}</p>
-                    <p><strong>Data de Início:</strong> {{InicioViagem:dd/MM/yyyy}}</p>
-                    <p><strong>Data de Término:</strong> {{FimViagem:dd/MM/yyyy}}</p>
-                    <p><strong>Viajante:</strong> {{FirstName}} {{LastName}}</p>
-                    <p><strong>Documento:</strong> {{CPFPassport}}</p>
+                    <p><strong>Pacote:</strong> {NomePacotes}</p>
+                    <p><strong>Origem:</strong> {Origem}</p>
+                    <p><strong>Destino:</strong> {Destino}</p>
+                    <p><strong>Data de Início:</strong> {InicioViagem}</p>
+                    <p><strong>Data de Término:</strong> {FimViagem}</p>
+                    <p><strong>Viajante:</strong> {FirstName} {LastName}</p>
+                    <p><strong>Documento:</strong> {CPFPassport}</p>
                 </div>
             </div>
 

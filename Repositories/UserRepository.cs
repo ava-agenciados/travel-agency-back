@@ -23,6 +23,14 @@ namespace travel_agency_back.Repositories
             return userBookings;
         }
 
+        public async Task<User> GetUserByIdAsync(int userId)
+        {
+            var result = await _context.Users
+                .Include(u => u.Bookings)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+            return result;
+        }
+
         public bool UserCPFPassportExists(string CPFPassport)
         {
             var CPFPassportExists = _context.Users.Any(u => u.CPFPassport == CPFPassport);

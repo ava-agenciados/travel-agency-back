@@ -8,7 +8,7 @@
         public decimal Amount { get; set; } // Valor do pagamento
         public string PaymentMethod { get; set; } = string.Empty; // Método de pagamento (Cartão de Crédito, Boleto, etc.)
         public DateTime PaymentDate { get; set; } = DateTime.UtcNow; // Data e hora do pagamento
-        public string Status { get; set; } = "Pendente"; // Status do pagamento (Pendente, Confirmado, Cancelado)
+        public string Status { get; set; } = ""; // Status do pagamento (Pendente, Confirmado, Cancelado)
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Data e hora de criação do pagamento
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow; // Data e hora da última atualização do pagamento
         public ICollection<PaymentLogs> PaymentLogs { get; set; } = new List<PaymentLogs>(); // Lista de logs de pagamento associados    

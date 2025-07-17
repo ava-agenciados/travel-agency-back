@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 using travel_agency_back.DTOs.Requests.Booking;
 using travel_agency_back.DTOs.Resposes;
@@ -26,18 +27,20 @@ namespace travel_agency_back.Controllers
             _bookingService = bookingService;
         }
 
+        /// <summary>
+        /// Retorna todas as reservas do usuário autenticado.
+        /// </summary>
+        /// <remarks>Endpoint protegido, retorna reservas do usuário logado.</remarks>
+        [SwaggerOperation(
+            Summary = "Retorna todas as reservas do usuário autenticado",
+            Description = "Endpoint protegido, retorna reservas do usuário logado."
+        )]
         //Retorna todos as reservas do usuario autenticado
         [HttpGet("bookings")]
         [Authorize]
         public Task<IActionResult> GetAllBookings()
         {
-           
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-            {
-                return Task.FromResult<IActionResult>(Unauthorized(new GenericResponseDTO(401, "Acesso não autorizado", false)));
-            }
-             
             int userId = int.Parse(userIdClaim.Value);
             var bookings = _bookingRepository.GetUserBookingsAsync(userId).Result;
             if (bookings == null || !bookings.Any())
@@ -63,65 +66,42 @@ namespace travel_agency_back.Controllers
             return Task.FromResult<IActionResult>(Ok(response));
         }
 
+        /// <summary>
+        /// Cria uma nova reserva para o usuário autenticado.
+        /// </summary>
+        /// <remarks>Endpoint protegido, realiza a reserva e pagamento.</remarks>
+        [SwaggerOperation(
+            Summary = "Cria uma nova reserva para o usuário autenticado",
+            Description = "Endpoint protegido, realiza a reserva e pagamento."
+        )]
         [HttpPut("bookings/payment")]
         [Authorize]
         public async Task<IActionResult> CreateNewBooking([FromBody] CreateNewBookingDTO createNewBooking)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            var userEmailClaim = User.FindFirst(ClaimTypes.Email); 
             if (userIdClaim == null)
                 return Unauthorized();
             if (createNewBooking == null)
                 return BadRequest("Dados de reserva inválidos.");
             int userId = int.Parse(userIdClaim.Value);
 
-            // Lógica do status da reserva baseado no método de pagamento principal
-            var mainPayment = createNewBooking.PaymentMethods?.FirstOrDefault();
-            string status = "Pendente";
-            if (mainPayment != null)
-            {
-                switch (mainPayment.PaymentMethod)
-                {
-                    case PaymentMethod.CreditCard:
-                    case PaymentMethod.DebitCard:
-                        status = "Recusado";
-                        break;
-                    case PaymentMethod.Boleto:
-                        status = "Pendente";
-                        break;
-                    case PaymentMethod.Pix:
-                        status = "Confirmado";
-                        break;
-                }
-            }
-
-            var booking = new Booking
-            {
-                PackageId = createNewBooking.PackageID,
-                TravelDate = createNewBooking.StartTravel,
-                Status = status,
-                Companions = createNewBooking.Companions?.Select(c => new Companions
-                {
-                    FullName = $"{c.FirstName} {c.LastName}",
-                    DocumentNumber = c.CPFPassport,
-                }).ToList() ?? new List<Companions>(),
-                Payments = createNewBooking.PaymentMethods?.Select(p => new Payments
-                {
-                    PaymentMethod = p.PaymentMethod.ToString(),
-                }).ToList() ?? new List<Payments>()
-            };
-            var paymentMethods = createNewBooking.PaymentMethods?.Select(p => p.PaymentMethod.ToString()).ToList() ?? new List<string>();
-
-            var result = await _bookingService.CreateUserBookingAsync(userId, userEmailClaim.Value, createNewBooking.PackageID, paymentMethods, booking);
-            var package = await _packageRepository.GetPackageByIdAsync(createNewBooking.PackageID);
+            var result = await _bookingService.CreateUserBookingAsync(userId, createNewBooking);
+          
             if (result is OkObjectResult)
             {
-                await EmailService.SendPaymentConfirmation(User.Claims, createNewBooking, paymentMethods, package);
                 return Ok(new GenericResponseDTO(200, "Reserva criada com sucesso", true));
             }
             return BadRequest(new GenericResponseDTO(500, "Falha ao cria reserva", false));
         }
 
+        /// <summary>
+        /// Retorna todas as reservas de todos os usuários (admin/atendente).
+        /// </summary>
+        /// <remarks>Endpoint protegido, acesso restrito a admin/atendente.</remarks>
+        [SwaggerOperation(
+            Summary = "Retorna todas as reservas de todos os usuários (admin/atendente)",
+            Description = "Endpoint protegido, acesso restrito a admin/atendente."
+        )]
         //Rotas Admin e Atendente
 
         //Retorna todas as reservas de TODOS os usuários

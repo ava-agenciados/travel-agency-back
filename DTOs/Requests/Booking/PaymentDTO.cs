@@ -21,6 +21,7 @@
         public string CardHolderName { get; set; } = string.Empty; // Nome do titular do cartão
         public string ExpirationDate { get; set; } = string.Empty; // Data de validade do cartão (MM/AA)
         public string CVV { get; set; } = string.Empty; // Código de segurança do cartão (CVV)
+        public int Installments { get; set; } = 1; // Número de parcelas para pagamento
         public bool IsCreditCard { get; set; } = true; // Indica se é um cartão de crédito (true) ou débito (false)
         public string CPFPassport { get; set; } = string.Empty; // CPF ou número de passaporte do titular do cartão
         public string PhoneNumber { get; set; } = string.Empty; // Número de telefone do titular do cartão

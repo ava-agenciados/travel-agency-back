@@ -15,6 +15,8 @@ namespace travel_agency_back.Repositories.Interfaces
 
         public Task<IEnumerable<Booking>> GetUserBookingsAsync(int userId);
 
+        public Task<User> GetUserByIdAsync(int userId);
+
         //Pacotes do usuario
 
     }

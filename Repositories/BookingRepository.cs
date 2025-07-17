@@ -15,7 +15,7 @@ namespace travel_agency_back.Repositories
         }
 
         // Implements the required interface method
-        public async Task<IActionResult> CreateUserBookingAsync(int userId, string userEmail, int packageId, ICollection<string> payment, Booking booking)
+        public async Task<IActionResult> CreateUserBookingAsync(int userId, int packageId, Booking booking)
         {
             if (booking == null)
                 return new BadRequestObjectResult("Booking inválido.");
