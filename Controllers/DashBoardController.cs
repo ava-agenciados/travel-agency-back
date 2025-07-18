@@ -12,7 +12,6 @@ namespace travel_agency_back.Controllers
     public class DashBoardController : Controller
     {
 
-
         private readonly IAdminService _adminService;
         public DashBoardController(IAdminService adminService)
         {
