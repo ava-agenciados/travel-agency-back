@@ -10,7 +10,6 @@
             this.StatusCode = StatusCode;
             this.Message = Message;
             this.Success = Success;
-     
         }
     }
 }

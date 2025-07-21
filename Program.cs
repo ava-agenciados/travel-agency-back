@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens; // Adicionado para JWT
 using Microsoft.OpenApi.Models; // Necessário para configuração do Swagger com JWT
 using System.Text; // Adicionado para JWT
@@ -12,8 +13,8 @@ using travel_agency_back.Services;
 using travel_agency_back.Services.Interfaces;
 using travel_agency_back.Utils;
 
-
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Adiciona os controladores MVC à aplicação, permitindo o uso de controllers e rotas de API.
 builder.Services.AddControllers();
@@ -56,13 +57,17 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 builder.Services.AddScoped<IPasswordHasher<User>, BcryptPasswordHasher<User>>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPackageService, PackageService>();
+builder.Services.AddScoped<IPackageRepository, PackageRepository>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<AuthService>(); // Registra o AuthService para ser injetado nos controllers
-
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 
 // Configura o ASP.NET Core Identity para usar a entidade User personalizada e roles (IdentityRole).
 // Define que não é necessário confirmar a conta por e-mail para autenticação.
 // Usa o ApplicationDBContext para persistência e adiciona provedores de token padrão.
-builder.Services.AddIdentity<User, IdentityRole>(options =>
+builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false; // Não exige confirmação de e-mail para login
 })
@@ -107,8 +112,21 @@ builder.Services.AddAuthentication(options =>
 });
 // =====================================================
 
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.EnableAnnotations(); // <-- Adicione esta linha
+                               
+});
+
 // Constrói a aplicação web com as configurações e serviços definidos acima.
 var app = builder.Build();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    await SeedData.EnsureRolesAndUsersAsync(scope.ServiceProvider);
+}
 
 // Configura o middleware de documentação Swagger apenas em ambiente de desenvolvimento, facilitando o teste e visualização dos endpoints da API.
 if (app.Environment.IsDevelopment())

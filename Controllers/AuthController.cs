@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 using travel_agency_back.DTOs.Requests;
 using travel_agency_back.DTOs.Resposes;
 using travel_agency_back.Services;
 using travel_agency_back.Services.Interfaces;
 using travel_agency_back.Third_party.Mail;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace travel_agency_back.Controllers
 {
@@ -43,6 +44,14 @@ namespace travel_agency_back.Controllers
             _authService = authService;
         }
 
+        /// <summary>
+        /// Registra um novo usuário na aplicação.
+        /// </summary>
+        /// <remarks>Endpoint público para cadastro de clientes.</remarks>
+        [SwaggerOperation(
+            Summary = "Registra um novo usuário na aplicação",
+            Description = "Endpoint público para cadastro de clientes."
+        )]
         //Metodo para registrar um novo usuário
         [HttpPost]
         [Route("auth/register")]
@@ -53,6 +62,7 @@ namespace travel_agency_back.Controllers
                 userDTO.FirstName,
                 userDTO.LastName,
                 userDTO.Email,
+                userDTO.PhoneNumber,
                 userDTO.CPFPassport,
                 userDTO.Password
             );
@@ -70,6 +80,14 @@ namespace travel_agency_back.Controllers
             return BadRequest(new GenericResponseDTO(400, "O endereço de email, CPF ou número de passaporte já está em uso!", false));
         }
 
+        /// <summary>
+        /// Realiza login e retorna o token JWT.
+        /// </summary>
+        /// <remarks>Endpoint público para autenticação de clientes.</remarks>
+        [SwaggerOperation(
+            Summary = "Realiza login e retorna o token JWT",
+            Description = "Endpoint público para autenticação de clientes."
+        )]
         // Novo método de login que retorna o token JWT
         [HttpPost]
         [Route("auth/login")]
@@ -100,6 +118,15 @@ namespace travel_agency_back.Controllers
             }
             return Unauthorized(new GenericResponseDTO(401, "Endereço de e-mail ou senha estão incorretos", false));
         }
+
+        /// <summary>
+        /// Realiza logout do usuário autenticado.
+        /// </summary>
+        /// <remarks>Endpoint protegido, remove o cookie JWT.</remarks>
+        [SwaggerOperation(
+            Summary = "Realiza logout do usuário autenticado",
+            Description = "Endpoint protegido, remove o cookie JWT."
+        )]
         [HttpPost]
         [Route("auth/logout")]
         [Authorize]
@@ -111,6 +138,14 @@ namespace travel_agency_back.Controllers
             return Ok(new GenericResponseDTO(200, "Usuário deslogado com sucesso!", true));
         }
 
+        /// <summary>
+        /// Inicia o processo de recuperação de senha.
+        /// </summary>
+        /// <remarks>Endpoint público, envia instruções para o e-mail informado.</remarks>
+        [SwaggerOperation(
+            Summary = "Inicia o processo de recuperação de senha",
+            Description = "Endpoint público, envia instruções para o e-mail informado."
+        )]
         [HttpPost]
         [Route("auth/forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDTO request)
@@ -127,7 +162,16 @@ namespace travel_agency_back.Controllers
             }
             return Ok(new GenericResponseDTO(200, $"Instruções para redefinir a senha foram enviadas para o seu e-mail {request.Email}", true));
         }
-        [HttpPut]
+
+        /// <summary>
+        /// Redefine a senha do usuário.
+        /// </summary>
+        /// <remarks>Endpoint público, redefine a senha usando token enviado por e-mail.</remarks>
+        [SwaggerOperation(
+            Summary = "Redefine a senha do usuário",
+            Description = "Endpoint público, redefine a senha usando token enviado por e-mail."
+        )]
+        [HttpPatch]
         [Route("auth/reset-password")]
         public async Task<IActionResult> ResetPassword([FromQuery] string token, [FromQuery] string email, [FromBody] ResetPasswordRequestDTO request)
         {
@@ -142,7 +186,6 @@ namespace travel_agency_back.Controllers
             {
                 return Ok(new GenericResponseDTO(200, "Senha redefinida com sucesso!", true));
             }
-
             return BadRequest(new GenericResponseDTO(400, "Erro ao redefinir a senha", false));
         }   
     }

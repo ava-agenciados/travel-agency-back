@@ -1,7 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using travel_agency_back.DTOs.Requests;
+using Swashbuckle.AspNetCore.Annotations;
+using travel_agency_back.DTOs.Requests.Booking;
+using travel_agency_back.DTOs.Requests.Packages;
+using travel_agency_back.DTOs.Resposes;
+using travel_agency_back.DTOs.Resposes.Packages;
+using travel_agency_back.Services.Interfaces;
 
 namespace travel_agency_back.Controllers
 {
@@ -28,29 +33,141 @@ namespace travel_agency_back.Controllers
     [ApiController]
     public class PackageController : ControllerBase
     {
+        private readonly IPackageService _packageService;
+        private readonly IAdminService _adminService;
+        private readonly IUserService _userService;
+
+
+        public PackageController(IPackageService packageService, IAdminService adminService, IUserService userService)
+        {
+            _packageService = packageService;
+            _adminService = adminService;
+            _userService = userService;
+        }
+        /// <summary>
+        /// Retorna todos os pacotes disponíveis.
+        /// </summary>
+        /// <remarks>Endpoint para listar pacotes disponíveis para compra.</remarks>
+        [SwaggerOperation(
+            Summary = "Retorna todos os pacotes disponíveis - Rota livre sem autenticação",
+            Description = "Endpoint para listar pacotes disponíveis para compra."
+        )]
+        [HttpGet("packages")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAllAvaliablePackages()
+        {
+            var packages = await _packageService.GetAllPackagesAsync();
+            if(packages == null)
+            {
+                return BadRequest(new GenericResponseDTO(404, "Nenhum pacote encontrado", false));
+            }
+            var response = packages.Select(p => new PackageResponseDTO
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Price = p.Price,
+                DepartureDate = p.DepartureDate,
+                ReturnDate = p.ReturnDate,
+                Origin = p.Origin,
+                Destination = p.Destination,
+                IsActive = p.IsActive,
+                Ratings = p.Ratings?.Select(r => new PackageRatingResponseDTO
+                {
+                    Id = r.Id,
+                    Rating = r.Rating,
+                    Comment = r.Comment
+                }).ToList(),
+                PackageMedia = p.PackageMedia?.Select(pm => new PackageMediaResponseDTO
+                {
+                    Id = pm.Id,
+                    MediaType = pm.MediaType,
+                    MediaUrl = pm.MediaUrl
+                }).ToList()
+            });
+            return Ok(response);
+        }
+        [SwaggerOperation(
+            Summary = "Retorna um pacote com base no seu ID - Rota livre sem autenticação",
+            Description = "Endpoint para retornar pacote por seu respectivo ID."
+        )]
+        [HttpGet("packages/{packageId}")]
+        public async Task<IActionResult> GetPackageByIdUser(int packageId)
+        {
+            var package = await _adminService.GetPackageByIdAsync(packageId);
+            if (package == null)
+                return NotFound(new GenericResponseDTO(404, "Pacote não encontrado", false));
+            
+            var response = new PackageResponseDTO
+            {
+                Id = package.Id,
+                Name = package.Name,
+                Description = package.Description,
+                Price = package.Price,
+                DepartureDate = package.DepartureDate,
+                ReturnDate = package.ReturnDate,
+                Origin = package.Origin,
+                Destination = package.Destination,
+                IsActive = package.IsActive,
+                Ratings = package.Ratings?.Select(r => new PackageRatingResponseDTO
+                {
+                    Id = r.Id,
+                    Rating = r.Rating,
+                    Comment = r.Comment
+                }).ToList(),
+                PackageMedia = package.PackageMedia?.Select(pm => new PackageMediaResponseDTO
+                {
+                    Id = pm.Id,
+                    MediaType = pm.MediaType,
+                    MediaUrl = pm.MediaUrl
+                }).ToList()
+            };
+            return Ok(response);
+        }
+        [SwaggerOperation(
+            Summary = "Retorna que retorna pacotes com base em seu filtro de pesquisa(origem, destino, datas) - Rota livre sem autenticação",
+            Description = "Endpoint para retornar pacotes com base em filtros"
+        )]
         [HttpGet("packages/search")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public Task<IActionResult> PackageSearch([FromQuery] PackageSearchRequestDTO packageSearchDTO)
+        public async Task<IActionResult> PackageSearch([FromQuery] PackageSearchRequestDTO packageSearchDTO)
         {
-            //TODO: Retorna uma lista de todos os pacotes disponiveis
-            return Task.FromResult<IActionResult>(Ok("All packages retrieved successfully"));
-        }
-
-        [HttpGet("packages/avaliable")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public Task<IActionResult> GetAllAvaliablePackages()
-        {
-            //TODO: Retorna uma lista de todos os pacotes disponiveis
-            return Task.FromResult<IActionResult>(Ok("All packages retrieved successfully"));
-        }
-
-        [HttpGet("packages/my-packages")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [Authorize]
-        public Task<IActionResult> GetMyPackages()
-        {
-            //TODO: Retorna uma lista de todos os pacotes do usuário autenticado
-            return Task.FromResult<IActionResult>(Ok("Return all user packages"));
+            
+             var packages = await _packageService.GetPackagesByFilterAsync(
+                packageSearchDTO.Origin,
+                packageSearchDTO.Destination,
+                packageSearchDTO.DepartureDate,
+                packageSearchDTO.ReturnDate
+            );
+            if (packages == null || !packages.Any())
+            {
+                return BadRequest(new GenericResponseDTO(404, "Nenhum pacote encontrado", false));
+            }
+            var response = packages.Select(p => new PackageResponseDTO
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                Price = p.Price,
+                DepartureDate = p.DepartureDate,
+                ReturnDate = p.ReturnDate,
+                Origin = p.Origin,
+                Destination = p.Destination,
+                IsActive = p.IsActive,
+                Ratings = p.Ratings?.Select(r => new PackageRatingResponseDTO
+                {
+                    Id = r.Id,
+                    Rating = r.Rating,
+                    Comment = r.Comment
+                }).ToList(),
+                PackageMedia = p.PackageMedia?.Select(pm => new PackageMediaResponseDTO
+                {
+                    Id = pm.Id,
+                    MediaType = pm.MediaType,
+                    MediaUrl = pm.MediaUrl
+                }).ToList()
+            });
+            return Ok(response);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;                 // (Não está sendo usado diretamente aqui, pode ser removido)
 using System.ComponentModel.DataAnnotations;
 
-namespace travel_agency_back.DTOs.Requests
+namespace travel_agency_back.DTOs.Requests.Packages
 {
     /// <summary>
     /// DTO utilizado para pesquisar pacotes de viagem.
@@ -27,5 +27,7 @@ namespace travel_agency_back.DTOs.Requests
         /// É opcional. Se fornecida, pode ser usada para filtrar resultados por data específica.
         /// </summary>
         public DateTime? DepartureDate { get; set; }
+
+        public DateTime? ReturnDate { get; set; }
     }
 }
