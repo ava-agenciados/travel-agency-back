@@ -21,6 +21,19 @@ builder.Services.AddControllers();
 
 // Adiciona suporte à documentação automática de endpoints (Swagger/OpenAPI) e configura autenticação JWT no Swagger
 builder.Services.AddEndpointsApiExplorer();
+
+// Configuração de política de CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // Permite requisições apenas do frontend, já configurado na porta 3000
+              .AllowAnyHeader() // Permite todos os cabeçalhos HTTP
+              .AllowAnyMethod() // Permite todos os métodos HTTP
+              .AllowCredentials(); // Importante para cookies/autenticação
+    });
+});
+
 builder.Services.AddSwaggerGen(options =>
 {
     // Configura o Swagger para aceitar JWT Bearer
@@ -137,6 +150,8 @@ if (app.Environment.IsDevelopment())
 
 // Adiciona middleware para redirecionar todas as requisições HTTP para HTTPS, aumentando a segurança.
 app.UseHttpsRedirection(); // Redireciona HTTP para HTTPS
+
+app.UseCors("AllowReactApp");
 
 // Adiciona o middleware de autenticação, necessário para identificar usuários autenticados.
 app.UseAuthentication(); // Habilita autenticação JWT na pipeline
