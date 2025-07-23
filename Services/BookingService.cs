@@ -31,12 +31,18 @@ namespace travel_agency_back.Services
             var payment = createNewBooking.PaymentMethods?.FirstOrDefault();
             var userInfo = await _userRepository.GetUserByIdAsync(userId);
 
+            // Busque o pacote antes de criar o Booking
+            var package = await _packageRepository.GetPackageByIdAsync(createNewBooking.PackageID);
+
+            if (package == null)
+            {
+                return new NotFoundObjectResult(new GenericResponseDTO(404, "Pacote não encontrado", false));
+            }
 
             var booking = new Booking
             {
                 PackageId = createNewBooking.PackageID,
                 TravelDate = createNewBooking.StartTravel,
-                Status = "",
                 Companions = createNewBooking.Companions?.Select(c => new Companions
                 {
                     FullName = $"{c.FirstName} {c.LastName}",
@@ -46,16 +52,10 @@ namespace travel_agency_back.Services
                 {
                     PaymentMethod = p.PaymentMethod.ToString(),
                     PaymentDate = DateTime.UtcNow,
-
+                    Amount = package.Price, // Aqui está o valor do pacote
                 }).ToList() ?? new List<Payments>()
             };
 
-            var package = await _packageRepository.GetPackageByIdAsync(booking.PackageId);
-            if (package == null)
-            {
-               
-                return new NotFoundObjectResult(new GenericResponseDTO(404, "Pacote não encontrado", false));
-            }
             if (userInfo == null)
             {
 

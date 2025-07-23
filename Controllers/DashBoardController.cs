@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using travel_agency_back.DTOs.Requests.Media;
 using travel_agency_back.DTOs.Requests.Packages;
 using travel_agency_back.DTOs.Resposes;
 using travel_agency_back.Services.Interfaces;
@@ -13,9 +14,11 @@ namespace travel_agency_back.Controllers
     {
 
         private readonly IAdminService _adminService;
-        public DashBoardController(IAdminService adminService)
+        private readonly IMediaService _mediaService;
+        public DashBoardController(IAdminService adminService, IMediaService mediaService)
         {
             _adminService = adminService;
+            _mediaService = mediaService;
         }
         /// <summary>
         /// Retorna todos pagamentos de todos usuários (admin/atendente).
@@ -133,6 +136,25 @@ namespace travel_agency_back.Controllers
             if (response == null)
                 return NotFound();
             return Ok(response);
+        }
+        [SwaggerOperation(
+            Summary = "Adiciona uma nova ou varias midias a um pacote",
+            Description = "Endpoint protegido, administradores e atendentes podem enviar midias para um pacote"
+        )]
+        [HttpPost("packages/{packageId}/add-midia")]
+        [Authorize(Roles = "Admin, Atendente")]
+        public async Task<IActionResult> UploadMediaToPackage(int packageID, [FromForm]List<IFormFile> uploadMedia)
+        {
+            var result = await _mediaService.UploadMediaAsync(packageID, uploadMedia);
+            if(result is BadRequestObjectResult)
+            {
+                return BadRequest(new GenericResponseDTO(400, "Formato de midia não autorizado", false));
+            }
+            if(result is NotFoundObjectResult)
+            {
+                return NotFound(new GenericResponseDTO(404, "Pacote não encontrado", false));
+            }
+            return Ok(new GenericResponseDTO(200, "Midia enviada com sucesso!", true));
         }
     }
 }

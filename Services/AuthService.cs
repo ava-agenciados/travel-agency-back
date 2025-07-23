@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using travel_agency_back.DTOs.Resposes;
 using travel_agency_back.Models;
+using travel_agency_back.Repositories.Interfaces;
 using travel_agency_back.Services.Interfaces;
 using travel_agency_back.Third_party.Mail;
 
@@ -12,10 +14,14 @@ namespace travel_agency_back.Services
     public class AuthService : IAuthService
     {
         private readonly IUserService _userService;
+        private readonly IUserRepository _userRepository;
+        private readonly UserManager<User> _userManager;
 
-        public AuthService(IUserService userService)
+        public AuthService(IUserService userService, IUserRepository userRepository, UserManager<User> userManager)
         {
             _userService = userService;
+            _userRepository = userRepository;
+            _userManager = userManager;
         }
 
         public async Task<(SignInResult Result, string Token)> LoginWithTokenAsync(string email, string password)
@@ -28,8 +34,33 @@ namespace travel_agency_back.Services
             return (result, token);
         }
 
-        public async Task<IdentityResult> RegisterAsync(string firstname, string lastname, string email, string phonenumber, string CPFPassport, string password)
+        public async Task<GenericResponseDTO> RegisterAsync(string firstname, string lastname, string email, string phonenumber, string CPFPassport, string password)
         {
+            if (string.IsNullOrEmpty(firstname) || string.IsNullOrEmpty(lastname) || string.IsNullOrEmpty(email) ||
+                string.IsNullOrEmpty(phonenumber) || string.IsNullOrEmpty(CPFPassport) || string.IsNullOrEmpty(password))
+            {
+                return new GenericResponseDTO(400, "Os campos precisam está preenchidos", false);
+            }
+            if(string.IsNullOrEmpty(phonenumber) || phonenumber.Length < 10)
+            {
+                return new GenericResponseDTO(400, "O número de telefone deve ter pelo menos 10 dígitos", false);
+            }
+            if(CPFPassport.Length < 6 || CPFPassport.Length > 11)
+            {
+                return new GenericResponseDTO(400, "O CPF ou número de passaporte deve ter entre 6 e 11 caracteres", false);
+            }
+            // Verifica se já existe um usuário com o mesmo e-mail
+            var existingEmail = await _userService.GetUserByEmailAsync(email);
+            if (existingEmail != null)
+            {
+                return new GenericResponseDTO(401, "Já existe um usuário com este e-mail", false);
+            }
+            var existingCPFPassport = await _userRepository.GetUserByCPFPassportAsync(CPFPassport);
+            if (existingCPFPassport != null)
+            {
+                return new GenericResponseDTO(401, "Já existe um usuário com este CPF ou número de passaporte", false);
+            }
+            // Cria o usuário com os dados fornecidos
             var user = new User
             {
                 FirstName = firstname,
@@ -39,14 +70,12 @@ namespace travel_agency_back.Services
                 PhoneNumber = phonenumber,
                 CPFPassport = CPFPassport
             };
-            return await _userService.RegisterAsync(
-                user.FirstName,
-                user.LastName,
-                user.Email,
-                user.PhoneNumber,
-                user.CPFPassport,
-                password
-            );
+            var result = await _userManager.CreateAsync(user,password);
+            if (!result.Succeeded)
+            {
+                return new GenericResponseDTO(400, "A senha deve conter pelo menos 9 caracteres, incluindo ao menos uma letra maiúscula, um número e um caractere especial.", false);
+            }
+            return new GenericResponseDTO(200, "Usuario registrado com sucesso", true);
         }
 
         public Task<bool> Logout(string token)
@@ -87,12 +116,6 @@ namespace travel_agency_back.Services
             {
                 return IdentityResult.Failed();
             }
-
-
-
-
-        
-
             return IdentityResult.Success;
         }
     }

@@ -11,7 +11,7 @@ namespace travel_agency_back.Services.Interfaces
         public Task<SignInResult> ResetPasswordAsync(string token, string email, string newPassword);
 
         public Task<User> GetUserByEmailAsync(string email);
-
+        public Task<User> GetUserByCPFPassport(string cpfPassport);
         public Task<(IdentityResult, string URL, bool emailSent)> GeneratePasswordResetTokenAsync(string email);
 
 

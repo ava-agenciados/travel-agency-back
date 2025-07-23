@@ -67,17 +67,8 @@ namespace travel_agency_back.Controllers
                 userDTO.Password
             );
             //Verifica se o registro foi bem-sucedido
-            if (UserRegister.Succeeded)
-            {
-                //Verifica se o usuário foi criado com sucesso
-                //TODO: Enviar um email de confirmação de registro
-                //Returna uma resposta de sucess
-
-                return Ok(new GenericResponseDTO(200, "Usuário registrado com sucesso!", true));
-            }
-
-            //Se o registro falhar, retorna uma resposta de erro com as mensagens de validação
-            return BadRequest(new GenericResponseDTO(400, "O endereço de email, CPF ou número de passaporte já está em uso!", false));
+            await EmailService.SendRegistrationEmail(userDTO.FirstName, userDTO.LastName, userDTO.Email);
+            return Ok(UserRegister);
         }
 
         /// <summary>

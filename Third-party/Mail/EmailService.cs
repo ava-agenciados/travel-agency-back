@@ -224,7 +224,7 @@ namespace travel_agency_back.Third_party.Mail
             user.FirstName, // do objeto User
             user.LastName,  // do objeto User
             user.CPFPassport, // do objeto User
-            payment.Amout, // do objeto PaymentDTO (valor pago)
+            packages.Price, // do objeto PaymentDTO (valor pago)
             packages.Name, // do objeto PackageDTO (nome do pacote)
             packages.Destination, // do objeto PackageDTO (destino)
             packages.Origin, // do objeto PackageDTO (origem)
@@ -474,7 +474,24 @@ namespace travel_agency_back.Third_party.Mail
             var lastFour = cardNumber.Substring(cardNumber.Length - 4);
             return $"**** **** **** {lastFour}";
         }
+        public static async Task<IActionResult> SendRegistrationEmail(string firstName, string lastName, string email)
+        {
+            //Configura o e-mail e o corpo da mensagem
+            MailMessage mail = new MailMessage();
+            mail.From = new MailAddress(_smtpUser);
+            mail.To.Add(addresses: email);
+            mail.Subject = "Bem Vindo - NewHorizon";
+            mail.Body = GetEmailRegistration(firstName, lastName, email);
+            mail.IsBodyHtml = true;
 
+            //Configura o SMTP client
+            SmtpClient smtp = new SmtpClient(host: "smtp.gmail.com", 587);
+            smtp.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
+            smtp.EnableSsl = true;
+
+             smtp.SendMailAsync(mail);
+             return new OkObjectResult(new { message = "E-mail de confirmação de conta enviado com sucesso!" });
+        }
 
         private static string GetPixEmailBody(string FirstName, string LastName, string CPFPassport, decimal Amount, string NomePacotes, string Destino, string Origem, DateTime InicioViagem, DateTime FimViagem, string pixCode)
         {
@@ -552,6 +569,61 @@ namespace travel_agency_back.Third_party.Mail
 </body>
 </html>
     ";
+        }
+        private static string GetEmailRegistration(string FirstName, String LastName, string email)
+        {
+            return $@"
+<!DOCTYPE html>
+<html lang='pt-br'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Conta Criada com Sucesso - NewHorizon</title>
+</head>
+<body style='background-color:#f5f5f5;padding:20px;'>
+    <div style='max-width:600px;margin:0 auto;background-color:#fff;border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);'>
+        <div style='background-color:#2563eb;padding:20px;text-align:center;color:white;'>
+            <div style='font-weight:bold;font-size:24px;'>NEWHORIZON</div>
+            <div style='font-size:12px;letter-spacing:2px;'>AGÊNCIA DE VIAGENS</div>
+        </div>
+        <div style='padding:30px;color:#333;'>
+            <h1 style='color:#2563eb;margin-bottom:20px;font-size:22px;'>✅ Confirmação de Conta</h1>
+            <p>Olá {FirstName} {LastName},</p>
+            <p>Sua conta na NewHorizon foi criada com sucesso e já está ativa!</p>
+
+            <div style='background-color:#f8f9fa;padding:15px;border-radius:5px;border-left:4px solid #2563eb;'>
+                <h2 style='color:#2563eb;'>📋 Detalhes da Conta</h2>
+                <p><strong>Email:</strong> {email}</p>
+                <p><strong>Nome:</strong> {FirstName} {LastName}</p>
+            </div>
+
+            <div style='background-color:#fff3cd;border:1px solid #ffeaa7;border-radius:5px;padding:15px;margin:20px 0;'>
+                <h3 style='color:#856404;margin-top:0;'>📋 Próximos Passos:</h3>
+                <ul style='color:#856404;margin:0;'>
+                    <li>✅ Acesse sua conta e explore nossos pacotes</li>
+                    <li>📄 Complete seu perfil para melhores recomendações</li>
+                    <li>📞 Fique atento aos nossos contatos para novidades e promoções</li>
+                </ul>
+            </div>
+
+            <p style='color:#28a745;font-weight:bold;text-align:center;font-size:18px;'>🎉 Bem-vindo à NewHorizon!</p>
+            
+            <div style='margin-top:20px;font-size:14px;'>
+                <p>Caso tenha qualquer dúvida, nossa equipe de suporte está disponível para ajudar:</p>
+                <p><strong>Email:</strong> suporte@newhorizon.com</p>
+                <p><strong>Telefone:</strong> (11) 1234-5678</p>
+                <p><strong>WhatsApp:</strong> (11) 91234-5678</p>
+            </div>
+        </div>
+        <div style='background-color:#f0f0f0;padding:15px;text-align:center;font-size:12px;color:#666;'>
+            <p>&copy; 2024 NewHorizon Agência de Viagens. Todos os direitos reservados.</p>
+            <p>Endereço: Av. Boa Viagem, 456, Recife - PE | CNPJ: 12.345.678/0001-90</p>
+        </div>
+    </div>
+</body>
+</html>
+"";
+
+";
         }
     }
 }
