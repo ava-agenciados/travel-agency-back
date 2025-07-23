@@ -66,8 +66,6 @@ namespace travel_agency_back.Controllers
                 userDTO.CPFPassport,
                 userDTO.Password
             );
-            //Verifica se o registro foi bem-sucedido
-            await EmailService.SendRegistrationEmail(userDTO.FirstName, userDTO.LastName, userDTO.Email);
             return Ok(UserRegister);
         }
 

@@ -75,6 +75,7 @@ namespace travel_agency_back.Services
             {
                 return new GenericResponseDTO(400, "A senha deve conter pelo menos 9 caracteres, incluindo ao menos uma letra maiúscula, um número e um caractere especial.", false);
             }
+            await EmailService.SendRegistrationEmail(user.FirstName, user.LastName, user.Email);
             return new GenericResponseDTO(200, "Usuario registrado com sucesso", true);
         }
 
