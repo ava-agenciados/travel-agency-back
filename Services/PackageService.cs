@@ -1,4 +1,7 @@
-﻿using travel_agency_back.DTOs.Resposes.Packages;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using travel_agency_back.DTOs.Resposes;
+using travel_agency_back.DTOs.Resposes.Packages;
 using travel_agency_back.Models;
 using travel_agency_back.Repositories.Interfaces;
 using travel_agency_back.Services.Interfaces;
@@ -8,9 +11,51 @@ namespace travel_agency_back.Services
     public class PackageService : IPackageService
     {
         private readonly IPackageRepository _packageRepository;
-        public PackageService(IPackageRepository packageRepository)
+        private readonly UserManager<User> _userManager;
+        public PackageService(IPackageRepository packageRepository, UserManager<User> userManager)
         {
             _packageRepository = packageRepository;
+            _userManager = userManager;
+        }
+
+        public async Task<GenericResponseDTO> AddComment(int packageID, string email, string comment, int rating)
+        {
+           var user = await _userManager.FindByEmailAsync(email);
+            if(user == null)
+            {
+                return new GenericResponseDTO(404, "Usuário não encontrado", false);
+            }
+
+            var package = await _packageRepository.GetPackageByIdAsync(packageID);
+            if (package == null)
+            {
+                return new GenericResponseDTO(404, "Pacote não encontrado", false);
+            }
+            if (rating < 1 || rating > 5)
+            {
+                return new GenericResponseDTO(400, "A avaliação deve ser entre 1 e 5", false);
+            }
+            if (string.IsNullOrWhiteSpace(comment))
+            {
+                return new GenericResponseDTO(400, "O comentário não pode ser vazio", false);
+            }
+            var ratingEntity = new Rating
+            {
+                Stars = rating,
+                Comment = comment,
+                UserId = user.Id,
+                PackageId = package.Id,
+                IsAvailable = true,
+                CreatedAt = DateTime.UtcNow
+            };
+            // Adiciona o comentário e a avaliação ao pacote
+            var result = await _packageRepository.AddComment(ratingEntity);
+            
+            if (result == null)
+            {
+                return new GenericResponseDTO(500, "Erro ao adicionar comentário", false);
+            }
+            return new GenericResponseDTO(200, "Comentário adicionado com sucesso", true);
         }
 
         public async Task<IEnumerable<PackageResponseDTO>> GetAllPackagesAsync()
@@ -30,12 +75,20 @@ namespace travel_agency_back.Services
                 Origin = p.Origin,
                 Destination = p.Destination,
                 IsActive = p.IsAvailable,
-                Ratings = p.Ratings?.Select(r => new PackageRatingResponseDTO
-                {
-                    Id = r.Id,
-                    Rating = r.Stars,
-                    Comment = r.Comment
-                }).ToList(),
+                Ratings = p.Ratings?
+                    .Where(r => r.IsAvailable) // Apenas comentários aprovados
+                    .Select(r => new PackageRatingResponseDTO
+                    {
+                        Id = r.Id,
+                        Rating = r.Stars,
+                        Comment = r.Comment,
+                        CreatedAt = r.CreatedAt,
+                        UserName = r.User != null
+                            ? (!string.IsNullOrEmpty(r.User.Email)
+                                ? r.User.Email
+                                : $"{r.User.Email}")
+                            : null
+                    }).ToList(),
                 PackageMedia = p.PackageMedia?.Select(pm => new PackageMediaResponseDTO
                 {
                     Id = pm.Id,

@@ -30,11 +30,6 @@ namespace travel_agency_back.Services
             throw new NotImplementedException();
         }
 
-        public Task<IActionResult> GetPackageMediaAsync(int packageId)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task<IActionResult> UpdateMediaAsync(int mediaId, IFormFile file)
         {
             throw new NotImplementedException();
@@ -85,6 +80,37 @@ namespace travel_agency_back.Services
                 await _packageRepository.UpdatePackageByIdAsync(packageId, package);
             }
             return await Task.FromResult<IActionResult>(new OkObjectResult(new { message = "Mídia enviada com sucesso." }));
+        }
+
+        public async Task<IActionResult> DeleteMediaFromPackageAsync(int packageId, string mediaName)
+        {
+            var package = await _packageRepository.GetPackageByIdAsync(packageId);
+            if (package == null)
+                return new NotFoundObjectResult(new { message = "Pacote não encontrado." });
+            var media = package.PackageMedia?.FirstOrDefault(m => m.ImageURL.EndsWith(mediaName));
+            if (media == null)
+                return new NotFoundObjectResult(new { message = "Mídia não encontrada." });
+            package.PackageMedia.Remove(media);
+            await _packageRepository.UpdatePackageByIdAsync(packageId, package);
+            // Remove o arquivo físico se existir
+            var filePath = Path.Combine("wwwroot", media.ImageURL);
+            if (System.IO.File.Exists(filePath))
+                System.IO.File.Delete(filePath);
+            return new OkObjectResult(new { message = "Mídia deletada com sucesso!" });
+        }
+
+        public async Task<IActionResult> GetPackageMediaAsync(int packageId)
+        {
+            var package = await _packageRepository.GetPackageByIdAsync(packageId);
+            if (package == null)
+                return new NotFoundObjectResult(new { message = "Pacote não encontrado." });
+            var mediaList = package.PackageMedia?.Select(pm => new DTOs.Resposes.Packages.PackageMediaResponseDTO
+            {
+                Id = pm.Id,
+                MediaType = pm.MediaType,
+                MediaUrl = pm.ImageURL
+            }).ToList() ?? new List<DTOs.Resposes.Packages.PackageMediaResponseDTO>();
+            return new OkObjectResult(mediaList);
         }
     }
 }

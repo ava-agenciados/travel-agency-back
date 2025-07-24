@@ -18,6 +18,10 @@ namespace travel_agency_back.Repositories.Interfaces
 
         public Task<List<Packages>> GetPackagesByFilter(string? origin, string? destination, DateTime? startDate, DateTime? endDate);
 
+        public Task<IActionResult> AddComment(Rating rating);
+
+        public Task<IActionResult> DeleteRating(int ratingId);
+
         public Task<List<Packages>> GetMostLovedPackages();
 
 

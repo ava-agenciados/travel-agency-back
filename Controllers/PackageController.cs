@@ -57,35 +57,11 @@ namespace travel_agency_back.Controllers
         public async Task<IActionResult> GetAllAvaliablePackages()
         {
             var packages = await _packageService.GetAllPackagesAsync();
-            if(packages == null)
+            if (packages == null)
             {
                 return BadRequest(new GenericResponseDTO(404, "Nenhum pacote encontrado", false));
             }
-            var response = packages.Select(p => new PackageResponseDTO
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Price = p.Price,
-                DepartureDate = p.DepartureDate,
-                ReturnDate = p.ReturnDate,
-                Origin = p.Origin,
-                Destination = p.Destination,
-                IsActive = p.IsActive,
-                Ratings = p.Ratings?.Select(r => new PackageRatingResponseDTO
-                {
-                    Id = r.Id,
-                    Rating = r.Rating,
-                    Comment = r.Comment
-                }).ToList(),
-                PackageMedia = p.PackageMedia?.Select(pm => new PackageMediaResponseDTO
-                {
-                    Id = pm.Id,
-                    MediaType = pm.MediaType,
-                    MediaUrl = pm.MediaUrl
-                }).ToList()
-            });
-            return Ok(response);
+            return Ok(packages);
         }
         [SwaggerOperation(
             Summary = "Retorna um pacote com base no seu ID - Rota livre sem autenticação",
@@ -97,7 +73,7 @@ namespace travel_agency_back.Controllers
             var package = await _adminService.GetPackageByIdAsync(packageId);
             if (package == null)
                 return NotFound(new GenericResponseDTO(404, "Pacote não encontrado", false));
-            
+
             var response = new PackageResponseDTO
             {
                 Id = package.Id,
@@ -132,13 +108,13 @@ namespace travel_agency_back.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> PackageSearch([FromQuery] PackageSearchRequestDTO packageSearchDTO)
         {
-            
-             var packages = await _packageService.GetPackagesByFilterAsync(
-                packageSearchDTO.Origin,
-                packageSearchDTO.Destination,
-                packageSearchDTO.DepartureDate,
-                packageSearchDTO.ReturnDate
-            );
+
+            var packages = await _packageService.GetPackagesByFilterAsync(
+               packageSearchDTO.Origin,
+               packageSearchDTO.Destination,
+               packageSearchDTO.DepartureDate,
+               packageSearchDTO.ReturnDate
+           );
             if (packages == null || !packages.Any())
             {
                 return BadRequest(new GenericResponseDTO(404, "Nenhum pacote encontrado", false));
@@ -168,6 +144,37 @@ namespace travel_agency_back.Controllers
                 }).ToList()
             });
             return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("packages/{packageid}/comment")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "Adiciona um comentário a um pacote",
+            Description = "Endpoint para adicionar um comentário a um pacote específico."
+        )]
+        public async Task<IActionResult> AddCommentToPackage(int packageId, [FromBody] PackageCommentRequestDTO commentRequest)
+        {
+            // Tenta obter o e-mail da claim do usuário autenticado
+            var email = User.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+            // Se não encontrar na claim, usa o e-mail do DTO (body)
+            if (string.IsNullOrEmpty(email))
+            {
+                email = commentRequest.Email;
+            }
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest(new GenericResponseDTO(400, "E-mail do usuário não encontrado.", false));
+            }
+            var result = await _packageService.AddComment(packageId, email, commentRequest.Comment, commentRequest.Rating);
+            if (result.Success)
+            {
+                return Ok(new GenericResponseDTO(200, "Comentário adicionado com sucesso", true));
+            }
+            else
+            {
+                return BadRequest(new GenericResponseDTO(result.StatusCode, result.Message, false));
+            }
         }
     }
 }

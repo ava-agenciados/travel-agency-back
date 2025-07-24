@@ -11,5 +11,6 @@ namespace travel_agency_back.Services.Interfaces
         public Task<IActionResult> DeleteMediaAsync(int mediaId);
         public Task<IActionResult> UpdateMediaAsync(int mediaId, IFormFile file);
         public Task<IActionResult> GetAllMediaAsync(int packageId);
+        Task<IActionResult> DeleteMediaFromPackageAsync(int packageId, string mediaName);
     }
 }
