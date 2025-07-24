@@ -105,19 +105,25 @@ namespace travel_agency_back.Services
             throw new NotImplementedException();
         }
 
-        public async Task<IdentityResult> ResetPasswordAsync(string token, string email, string newPassword)
+        public async Task<GenericResponseDTO> ResetPasswordAsync(string token, string email, string newPassword)
         {
-            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(newPassword))
+            if(string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(newPassword))
             {
-                return IdentityResult.Failed();
+                return new GenericResponseDTO(400, "Token, e-mail e nova senha são obrigatórios", false);
             }
 
-            var resetResult = await _userService.ResetPasswordAsync(token, email, newPassword);
+            var user = await _userService.GetUserByEmailAsync(email);
+            if( user == null)
+            {
+                return new GenericResponseDTO(404, "Usuário não encontrado", false);
+            }
+
+            var resetResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
             if (resetResult == null || !resetResult.Succeeded)
             {
-                return IdentityResult.Failed();
+                return new GenericResponseDTO(401, "Falha ao tentar alterar senha", false);
             }
-            return IdentityResult.Success;
+            return new GenericResponseDTO(200, "Senha alterada com sucesso", true);
         }
     }
 }

@@ -162,20 +162,10 @@ namespace travel_agency_back.Controllers
         )]
         [HttpPatch]
         [Route("auth/reset-password")]
-        public async Task<IActionResult> ResetPassword([FromQuery] string token, [FromQuery] string email, [FromBody] ResetPasswordRequestDTO request)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO request)
         {
-            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(request.Password))
-            {
-                return BadRequest(new GenericResponseDTO(400, "Token, e-mail e nova senha são obrigatórios", false));
-            }
-            // Busca o usuário pelo e-mail
-            // Tenta redefinir a senha do usuário
-            var resetResult = await _authService.ResetPasswordAsync(token, email, request.Password);
-            if (resetResult.Succeeded)
-            {
-                return Ok(new GenericResponseDTO(200, "Senha redefinida com sucesso!", true));
-            }
-            return BadRequest(new GenericResponseDTO(400, "Erro ao redefinir a senha", false));
+            var resetResult = await _authService.ResetPasswordAsync(request.Token, request.Email, request.Password);
+            return Ok(resetResult);
         }   
     }
 }

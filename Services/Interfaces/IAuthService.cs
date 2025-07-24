@@ -12,7 +12,7 @@ namespace travel_agency_back.Services.Interfaces
         Task GetUserByEmailAsync(string email);
 
         public Task<(IdentityResult, string URL, bool emailSent)> GeneratePasswordResetTokenAsync(string email);
-        public Task<IdentityResult> ResetPasswordAsync(string token, string email, string newPassword);
+        public Task<GenericResponseDTO> ResetPasswordAsync(string token, string email, string newPassword);
     }
 
 }
