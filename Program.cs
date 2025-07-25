@@ -126,12 +126,23 @@ builder.Services.AddAuthentication(options =>
 });
 // =====================================================
 
-
-
 builder.Services.AddSwaggerGen(options =>
 {
     options.EnableAnnotations(); // <-- Adicione esta linha
                                
+});
+
+// Adiciona CORS para permitir cookies entre domínios
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:3000") // Altere para o domínio do seu front-end
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
 });
 
 // Constrói a aplicação web com as configurações e serviços definidos acima.
@@ -155,6 +166,7 @@ app.UseStaticFiles(); // Permite servir arquivos estáticos (como imagens, CSS, J
 
 // Adiciona middleware para redirecionar todas as requisições HTTP para HTTPS, aumentando a segurança.
 app.UseHttpsRedirection(); // Redireciona HTTP para HTTPS
+app.UseCors(); // Adiciona o middleware CORS antes de autenticação
 
 app.UseCors("AllowReactApp");
 
