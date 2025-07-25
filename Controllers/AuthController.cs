@@ -98,7 +98,7 @@ namespace travel_agency_back.Controllers
                     new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = true, // Use true em produção (HTTPS)
+                        Secure = false, // Use true em produção (HTTPS)
                         SameSite = SameSiteMode.Strict, // Ou Lax, conforme necessidade
                         Expires = DateTimeOffset.UtcNow.AddHours(2)
                     }
