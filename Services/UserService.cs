@@ -126,7 +126,7 @@ namespace travel_agency_back.Services
                 return (IdentityResult.Failed(), null, false);
             }
 
-            var baseUrl = "https://localhost:7283";
+            var baseUrl = "http://localhost:3000";
             var resetUrl = $"{baseUrl}/reset-password?token={Uri.EscapeDataString(token)}&email={Uri.EscapeDataString(user.Email)}";
 
             //envia email com o link de redefinição de senha
