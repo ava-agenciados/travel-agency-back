@@ -44,6 +44,10 @@ namespace travel_agency_back.Repositories
             var result = await _context.Users
                 .Include(u => u.Bookings)
                 .FirstOrDefaultAsync(u => u.Id == userId);
+            if(result == null)
+            {
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
+            }
             return result;
         }
 

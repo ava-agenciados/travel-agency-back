@@ -121,8 +121,6 @@ namespace travel_agency_back.Controllers
         [Authorize]
         public async Task<IActionResult> Logout()
         {
-            // Remove o cookie JWT ao fazer logout
-            //TODO: REFATORAR ISSO AQUI PELO AMOR!!!!!!!!!!!!!!!!!!!!
             Response.Cookies.Delete("jwt");
             return Ok(new GenericResponseDTO(200, "Usuário deslogado com sucesso!", true));
         }

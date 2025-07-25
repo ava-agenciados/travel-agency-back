@@ -130,6 +130,14 @@ namespace travel_agency_back.Data
                 .WithOne(l => l.Payment)
                 .HasForeignKey(l => l.PaymentId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Explicit precision for decimal properties
+            builder.Entity<Packages>()
+                .Property(p => p.Price)
+                .HasPrecision(18, 2);
+            builder.Entity<Payments>()
+                .Property(p => p.Amount)
+                .HasPrecision(18, 2);
         }
     }
 }

@@ -239,18 +239,7 @@ namespace travel_agency_back.Third_party.Mail
             smtp.EnableSsl = true;
 
             // Envia o e-mail
-            try
-            {
-                var result  = smtp.SendMailAsync(mail);
-                if(result.IsCompletedSuccessfully)
-                    logger?.LogInformation("E-mail enviado com sucesso para {0}", user.Email);
-                else
-                    logger?.LogWarning("E-mail não enviado para {0}", user.Email);
-            }
-            catch (Exception ex)
-            {
-                logger?.LogError(ex, "Erro ao enviar e-mail para {0}", user.NormalizedEmail);
-            }
+            await smtp.SendMailAsync(mail);
             return new OkObjectResult(new { message = "E-mail de confirmação do PIX enviado com sucesso!" });
         }
 
@@ -489,7 +478,7 @@ namespace travel_agency_back.Third_party.Mail
             smtp.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
             smtp.EnableSsl = true;
 
-             smtp.SendMailAsync(mail);
+             await smtp.SendMailAsync(mail);
              return new OkObjectResult(new { message = "E-mail de confirmação de conta enviado com sucesso!" });
         }
 
