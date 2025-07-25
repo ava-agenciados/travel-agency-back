@@ -23,24 +23,24 @@ namespace travel_agency_back.DTOs.Requests
     /// </summary>
     public record CreateUserRequestDTO
     {
-        [Required(ErrorMessage = "First name is required.")]
+        [Required(ErrorMessage = "É necessario informar o primeiro nome!")]
         public string? FirstName { get; init; }
 
-        [Required(ErrorMessage = "Last name is required.")]
+        [Required(ErrorMessage = "É necessario informar o sobrenome!")]
         public string? LastName { get; init; }
 
-        [Required(ErrorMessage = "CPF or Passport is required.")]
+        [Required(ErrorMessage = "O Número de CPF ou de Passaporte precisa ser informado!")]
         public string? CPFPassport { get; init; }
 
-        [Phone(ErrorMessage = "Invalid phone number format.")]
+        [Phone(ErrorMessage = "O Número de telefone está em um formato inválido")]
         public string? PhoneNumber { get; init; }
 
         [EmailAddress]
-        [Required(ErrorMessage = "Email is required.")]
+        [Required(ErrorMessage = "É Necessario um endereço de E-mail válido")]
         public string? Email { get; init; }
 
         [Required]
-        [MinLength(8, ErrorMessage = "Password must be at least 8 characters long.")]
+        [MinLength(8, ErrorMessage = "A senha precisa ter pelo menos 8 caracteres")]
         public string? Password { get; init; }
 
     }

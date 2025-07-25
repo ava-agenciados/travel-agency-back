@@ -11,11 +11,11 @@ namespace travel_agency_back.Repositories.Interfaces
         /// UserEmailExists: Verifica se o email já está cadastrado
         /// UserCpfPassportExists: Verifica se o CPF ou passaporte já está cadastrado
         /// 
-        public bool UserCPFPassportExists(string CPFPassport);
 
         public Task<IEnumerable<Booking>> GetUserBookingsAsync(int userId);
-
         public Task<User> GetUserByIdAsync(int userId);
+        public Task<User> GetUserByEmailAsync(string email);
+        public Task<User> GetUserByCPFPassportAsync(string CPFPassport);
 
         //Pacotes do usuario
 

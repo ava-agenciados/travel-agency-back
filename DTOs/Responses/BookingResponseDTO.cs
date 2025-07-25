@@ -1,6 +1,6 @@
 ﻿namespace travel_agency_back.DTOs.Resposes
 {
-    internal class BookingResponseDTO
+    public class BookingResponseDTO
     {
         public int Id { get; set; }
         public int PackageId { get; set; }

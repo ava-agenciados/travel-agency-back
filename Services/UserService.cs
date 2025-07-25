@@ -37,16 +37,26 @@ namespace travel_agency_back.Services
                 CPFPassport = CPFPassport,
                 UserName = email
             };
-
-            if(_userRepository.UserCPFPassportExists(CPFPassport))
+            if(string.IsNullOrEmpty(firstname) || string.IsNullOrEmpty(lastname) || string.IsNullOrEmpty(email) ||
+                string.IsNullOrEmpty(phonenumber) || string.IsNullOrEmpty(CPFPassport) || string.IsNullOrEmpty(password))
             {
-                return IdentityResult.Failed();
+                return IdentityResult.Failed(new IdentityError { Description = "Os campos precisam está preenchidos" });
+            }
+            if (await _userManager.FindByEmailAsync(email) != null)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "E-mail já está em uso" });
+            }
+            var userCPF =  await _userRepository.GetUserByCPFPassportAsync(CPFPassport);
+            if (userCPF != null)
+            {
+                return IdentityResult.Failed(new IdentityError { Description = "CPF ou número de passaporte já está em uso"});
             }
 
             var newUserResult = await _userManager.CreateAsync(user, password);
             if (!newUserResult.Succeeded)
             {
-                return IdentityResult.Failed();
+                // Retorne os erros detalhados do Identity
+                return newUserResult;
             }
             // Adiciona a role ao usuário
             await _userManager.AddToRoleAsync(user, user.Role);
@@ -99,10 +109,6 @@ namespace travel_agency_back.Services
         public Task<User> GetUserByEmailAsync(string email)
         {
             var user = _userManager.FindByEmailAsync(email);
-            if (user.IsFaulted || user.Result == null)
-            {
-                throw new Exception("Usuário não encontrado");
-            }
             return user;
         }
 
@@ -146,6 +152,12 @@ namespace travel_agency_back.Services
                 throw new Exception("Nenhuma reserva encontrada para o usuário");
             }
             return bookings;
+        }
+
+        public Task<User> GetUserByCPFPassport(string cpfPassport)
+        {
+            var user = _userRepository.GetUserByCPFPassportAsync(cpfPassport);
+            return user;
         }
     }
 }

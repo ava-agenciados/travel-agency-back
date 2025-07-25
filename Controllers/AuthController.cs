@@ -66,18 +66,7 @@ namespace travel_agency_back.Controllers
                 userDTO.CPFPassport,
                 userDTO.Password
             );
-            //Verifica se o registro foi bem-sucedido
-            if (UserRegister.Succeeded)
-            {
-                //Verifica se o usuário foi criado com sucesso
-                //TODO: Enviar um email de confirmação de registro
-                //Returna uma resposta de sucess
-
-                return Ok(new GenericResponseDTO(200, "Usuário registrado com sucesso!", true));
-            }
-
-            //Se o registro falhar, retorna uma resposta de erro com as mensagens de validação
-            return BadRequest(new GenericResponseDTO(400, "O endereço de email, CPF ou número de passaporte já está em uso!", false));
+            return Ok(UserRegister);
         }
 
         /// <summary>
@@ -132,8 +121,6 @@ namespace travel_agency_back.Controllers
         [Authorize]
         public async Task<IActionResult> Logout()
         {
-            // Remove o cookie JWT ao fazer logout
-            //TODO: REFATORAR ISSO AQUI PELO AMOR!!!!!!!!!!!!!!!!!!!!
             Response.Cookies.Delete("jwt");
             return Ok(new GenericResponseDTO(200, "Usuário deslogado com sucesso!", true));
         }
@@ -173,20 +160,10 @@ namespace travel_agency_back.Controllers
         )]
         [HttpPatch]
         [Route("auth/reset-password")]
-        public async Task<IActionResult> ResetPassword([FromQuery] string token, [FromQuery] string email, [FromBody] ResetPasswordRequestDTO request)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO request)
         {
-            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(request.Password))
-            {
-                return BadRequest(new GenericResponseDTO(400, "Token, e-mail e nova senha são obrigatórios", false));
-            }
-            // Busca o usuário pelo e-mail
-            // Tenta redefinir a senha do usuário
-            var resetResult = await _authService.ResetPasswordAsync(token, email, request.Password);
-            if (resetResult.Succeeded)
-            {
-                return Ok(new GenericResponseDTO(200, "Senha redefinida com sucesso!", true));
-            }
-            return BadRequest(new GenericResponseDTO(400, "Erro ao redefinir a senha", false));
+            var resetResult = await _authService.ResetPasswordAsync(request.Token, request.Email, request.Password);
+            return Ok(resetResult);
         }   
     }
 }

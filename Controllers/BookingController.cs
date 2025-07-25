@@ -93,23 +93,5 @@ namespace travel_agency_back.Controllers
             }
             return BadRequest(new GenericResponseDTO(500, "Falha ao cria reserva", false));
         }
-
-        /// <summary>
-        /// Retorna todas as reservas de todos os usuários (admin/atendente).
-        /// </summary>
-        /// <remarks>Endpoint protegido, acesso restrito a admin/atendente.</remarks>
-        [SwaggerOperation(
-            Summary = "Retorna todas as reservas de todos os usuários (admin/atendente)",
-            Description = "Endpoint protegido, acesso restrito a admin/atendente."
-        )]
-        //Rotas Admin e Atendente
-
-        //Retorna todas as reservas de TODOS os usuários
-        [HttpGet("dashboard/bookings")]
-        [Authorize(Roles = "Admin,Atendente")]
-        public IActionResult GetBookings()
-        {
-            return Ok(new { Message = "Lista de todas as reservas" });
-        }
     }
 }

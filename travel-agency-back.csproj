@@ -29,7 +29,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="DTOs\Resposes\" />
     <Folder Include="Migrations\" />
+    <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
 </Project>

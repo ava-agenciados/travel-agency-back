@@ -15,6 +15,18 @@ namespace travel_agency_back.Repositories
             _context = context;
         }
 
+        public async Task<IActionResult> AddComment(Rating rating)
+        {
+            var result = await _context.Rating.AddAsync(rating);
+            if (result == null)
+            {
+                return new BadRequestObjectResult(new { Message = "Erro ao adicionar comentário" });
+            }
+            await _context.SaveChangesAsync();
+            return new OkObjectResult(new { Message = "Comentário adicionado com sucesso", Rating = result.Entity });
+
+        }
+
         public async Task<IActionResult> CreateNewPackageAsync(Packages package)
         {
             var newPackage = new Packages
@@ -65,7 +77,7 @@ namespace travel_agency_back.Repositories
         {
             var packages = await _context.Packages
                 .Include(p => p.Bookings)
-                .Include(p => p.Ratings)
+                .Include(p => p.Ratings).ThenInclude(r => r.User)
                 .Include(p => p.PackageMedia)
                 .Where(p => p.IsAvailable)
                 .ToListAsync();
@@ -160,6 +172,17 @@ namespace travel_agency_back.Repositories
             _context.Packages.Update(existingPackage);
             _context.SaveChanges();
             return await Task.FromResult<IActionResult>(new OkObjectResult(existingPackage));
+        }
+        public async Task<IActionResult> DeleteRating(int ratingId)
+        {
+            var rating = await _context.Rating.FindAsync(ratingId);
+            if (rating == null)
+            {
+                return new NotFoundObjectResult(new { Message = "Avaliação não encontrada" });
+            }
+            _context.Rating.Remove(rating);
+            await _context.SaveChangesAsync();
+            return new OkObjectResult(new { Message = "Avaliação deletada com sucesso" });
         }
     }
 }

@@ -13,7 +13,7 @@ namespace travel_agency_back.DTOs.Requests
         /// Deve estar em formato válido e é obrigatório.
         /// </summary>
         [Required] // Validação obrigatória: o campo não pode ser nulo ou vazio
-        [EmailAddress(ErrorMessage = "Invalid email format.")]  // Valida se o e-mail está no formato correto
-        public string Email { get; init; } // Propriedade somente leitura na inicialização (init-only)
+        [EmailAddress(ErrorMessage = "O Endereço de E-mail está em um formato inválido")]  // Valida se o e-mail está no formato correto
+        public required string Email { get; init; } // Propriedade somente leitura na inicialização (init-only)
     }
 }

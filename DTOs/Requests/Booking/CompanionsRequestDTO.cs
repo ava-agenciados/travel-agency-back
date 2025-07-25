@@ -12,8 +12,9 @@ namespace travel_agency_back.DTOs.Requests.Booking
         public string? CPFPassport { get; set; }
         [Required]
         public bool? IsForeigner { get; set; } = false; // Indica se o acompanhante é estrangeiro
+        
         [Required]
-        [Phone]
+        [Phone(ErrorMessage = "É Necessario informar um número de telefone válido")]
         public string? PhoneNumber { get; set; } // Corrigido: Nome correto do campo
     }
 }

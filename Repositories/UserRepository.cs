@@ -23,22 +23,33 @@ namespace travel_agency_back.Repositories
             return userBookings;
         }
 
+        public async Task<User> GetUserByCPFPassportAsync(string CPFPassport)
+        {
+            var user = await _context.Users
+                .Include(u => u.Bookings)
+                .FirstOrDefaultAsync(u => u.CPFPassport == CPFPassport);
+            return user;
+        }
+
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            var user = await _context.Users
+                .Include(u => u.Bookings)
+                .FirstOrDefaultAsync(u => u.Email == email);
+            return user;
+        }
+
         public async Task<User> GetUserByIdAsync(int userId)
         {
             var result = await _context.Users
                 .Include(u => u.Bookings)
                 .FirstOrDefaultAsync(u => u.Id == userId);
+            if(result == null)
+            {
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
+            }
             return result;
         }
 
-        public bool UserCPFPassportExists(string CPFPassport)
-        {
-            var CPFPassportExists = _context.Users.Any(u => u.CPFPassport == CPFPassport);
-            if(CPFPassportExists)
-            {
-                return true;
-            }
-            return false;
-        }
     }
 }

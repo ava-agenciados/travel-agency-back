@@ -7,19 +7,19 @@ namespace travel_agency_back.Models
     {
         
         [Required]
-        public string FirstName { get; set; }
+        public required string FirstName { get; set; }
 
         [Required]
-        public string LastName { get; set; }
+        public required string LastName { get; set; }
 
-        [Required]
-        [MinLength(6)]
-        [MaxLength(11)]
         // Regex para validar CPF (11 dígitos) ou Passaporte (2 letras seguidas de 6 a 9 dígitos)
         //se tiver 6 dígitos, é considerado um passaporte
         //se tiver 11 dígitos, é considerado um CPF
+        [Required]
+        [MinLength(6)]
+        [MaxLength(11)]
         [RegularExpression(@"^\d{11}$|^[A-Z]{2}\d{6}$", ErrorMessage = "CPF ou número de passaporte inválidos")]
-        public string CPFPassport { get; set; }
+        public required string CPFPassport { get; set; }
 
         //Padrão todo usuario é um cliente
         [Required]

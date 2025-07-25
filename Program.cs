@@ -76,6 +76,7 @@ builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<AuthService>(); // Registra o AuthService para ser injetado nos controllers
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IMediaService, MediaService>();
 
 // Configura o ASP.NET Core Identity para usar a entidade User personalizada e roles (IdentityRole).
 // Define que não é necessário confirmar a conta por e-mail para autenticação.
@@ -126,6 +127,7 @@ builder.Services.AddAuthentication(options =>
 // =====================================================
 
 
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.EnableAnnotations(); // <-- Adicione esta linha
@@ -147,6 +149,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger(); // Ativa o Swagger para documentação da API
     app.UseSwaggerUI(); // Ativa a interface do Swagger
 }
+
+
+app.UseStaticFiles(); // Permite servir arquivos estáticos (como imagens, CSS, JS) da pasta wwwroot
 
 // Adiciona middleware para redirecionar todas as requisições HTTP para HTTPS, aumentando a segurança.
 app.UseHttpsRedirection(); // Redireciona HTTP para HTTPS
