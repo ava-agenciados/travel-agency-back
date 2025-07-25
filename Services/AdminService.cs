@@ -210,6 +210,15 @@ namespace travel_agency_back.Services
                 return new GenericResponseDTO(500, $"Erro ao adicionar novo cargo: {addErrors}", false);
             }
 
+            // Atualiza a propriedade Role do usuário e salva no banco
+            user.Role = dto.NewRole;
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                var updateErrors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+                return new GenericResponseDTO(500, $"Erro ao atualizar o campo Role: {updateErrors}", false);
+            }
+
             return new GenericResponseDTO(200, "Cargo alterado com sucesso", true);
         }
 
