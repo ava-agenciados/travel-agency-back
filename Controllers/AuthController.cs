@@ -97,13 +97,18 @@ namespace travel_agency_back.Controllers
                     token,
                     new CookieOptions
                     {
-                        HttpOnly = true,
+                        HttpOnly = false,
                         Secure = false, // Use true em produção (HTTPS)
-                        SameSite = SameSiteMode.Strict, // Ou Lax, conforme necessidade
+                        SameSite = SameSiteMode.Lax, // Ou Lax, conforme necessidade
                         Expires = DateTimeOffset.UtcNow.AddHours(2)
                     }
                 );
-                return Ok(new GenericResponseDTO(200, "Usuário autenticado com sucesso!", true));
+                return Ok(new
+                {
+                    token,
+                    message = "Usuário autenticado com sucesso!",
+                    success = true
+                });
             }
             return Unauthorized(new GenericResponseDTO(401, "Endereço de e-mail ou senha estão incorretos", false));
         }

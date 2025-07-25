@@ -168,7 +168,7 @@ if (app.Environment.IsDevelopment())
 app.UseStaticFiles(); // Permite servir arquivos estáticos (como imagens, CSS, JS) da pasta wwwroot
 
 // Adiciona middleware para redirecionar todas as requisições HTTP para HTTPS, aumentando a segurança.
-app.UseHttpsRedirection(); // Redireciona HTTP para HTTPS
+//app.UseHttpsRedirection(); // Redireciona HTTP para HTTPS
 app.UseCors(); // Adiciona o middleware CORS antes de autenticação
 
 app.UseCors("AllowReactApp");
