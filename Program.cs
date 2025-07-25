@@ -113,6 +113,9 @@ builder.Services.AddAuthentication(options =>
 });
 // =====================================================
 
+
+QuestPDFLicenseConfig.ConfigureLicense();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.EnableAnnotations(); // <-- Adicione esta linha
