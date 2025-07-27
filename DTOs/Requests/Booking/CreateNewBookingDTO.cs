@@ -8,5 +8,10 @@
         public DateTime EndTravel { get; set; }
         public IEnumerable<CompanionsRequestDTO> Companions { get; set; } = new List<CompanionsRequestDTO>();
         public IEnumerable<PaymentDTO> PaymentMethods { get; set; } = new List<PaymentDTO>();
+        // Opcionais
+        public bool? HasTravelInsurance { get; set; }
+        public bool? HasTourGuide { get; set; }
+        public bool? HasTour { get; set; }
+        public bool? HasActivities { get; set; }
     }
 }

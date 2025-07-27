@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using travel_agency_back.DTOs;
 using travel_agency_back.Models;
 
 namespace travel_agency_back.Data
@@ -34,6 +36,7 @@ namespace travel_agency_back.Data
         public DbSet<Booking> UserBookings { get; set; } // DbSet para a entidade UserBooking
         public DbSet<PackageMedia> PackageMedia { get; set; } // DbSet para a entidade PackageMedia
         public DbSet<Packages> Packages { get; set; } // DbSet para a entidade Packages  
+        public DbSet<LodgingInfo> LodgingInfos { get; set; } // DbSet para a entidade LodgingInfo
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -138,6 +141,13 @@ namespace travel_agency_back.Data
             builder.Entity<Payments>()
                 .Property(p => p.Amount)
                 .HasPrecision(18, 2);
+
+            // Relacionamento 1:1 Packages <-> LodgingInfo
+            builder.Entity<Packages>()
+                .HasOne(p => p.LodgingInfo)
+                .WithOne(l => l.Package)
+                .HasForeignKey<Packages>(p => p.LodgingInfoId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

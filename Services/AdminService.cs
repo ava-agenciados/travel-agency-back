@@ -25,6 +25,32 @@ namespace travel_agency_back.Services
 
         public async Task<IActionResult> CreatePackageAsync(CreateNewPackageDTO createNewPackageDTO)
         {
+            LodgingInfo lodgingInfo = null;
+            if (createNewPackageDTO.LodgingInfo != null)
+            {
+                lodgingInfo = new LodgingInfo
+                {
+                    Baths = createNewPackageDTO.LodgingInfo.Baths ?? 0,
+                    Beds = createNewPackageDTO.LodgingInfo.Beds ?? 0,
+                    WifiIncluded = createNewPackageDTO.LodgingInfo.WifiIncluded ?? false,
+                    ParkingSpot = createNewPackageDTO.LodgingInfo.ParkingSpot ?? false,
+                    SwimmingPool = createNewPackageDTO.LodgingInfo.SwimmingPool ?? false,
+                    FitnessCenter = createNewPackageDTO.LodgingInfo.FitnessCenter ?? false,
+                    RestaurantOnSite = createNewPackageDTO.LodgingInfo.RestaurantOnSite ?? false,
+                    PetAllowed = createNewPackageDTO.LodgingInfo.PetAllowed ?? false,
+                    AirConditioned = createNewPackageDTO.LodgingInfo.AirConditioned ?? false,
+                    Breakfast = createNewPackageDTO.LodgingInfo.Breakfast ?? false,
+                    Street = createNewPackageDTO.LodgingInfo.Location?.Street,
+                    Number = createNewPackageDTO.LodgingInfo.Location?.Number,
+                    Neighborhood = createNewPackageDTO.LodgingInfo.Location?.Neighborhood,
+                    City = createNewPackageDTO.LodgingInfo.Location?.City,
+                    State = createNewPackageDTO.LodgingInfo.Location?.State,
+                    Country = createNewPackageDTO.LodgingInfo.Location?.Country,
+                    ZipCode = createNewPackageDTO.LodgingInfo.Location?.ZipCode,
+                    Complement = createNewPackageDTO.LodgingInfo.Location?.Complement
+                };
+            }
+
             var package = new Packages
             {
                 Name = createNewPackageDTO.Name,
@@ -37,13 +63,14 @@ namespace travel_agency_back.Services
                 BeginDate = createNewPackageDTO.BeginDate,
                 EndDate = createNewPackageDTO.EndDate,
                 Quantity = createNewPackageDTO.Quantity,
-
                 IsAvailable = createNewPackageDTO.IsAvailable,
-                ImageUrl = createNewPackageDTO.ImageUrl, // Assuming ImageUrl is part of CreateNewPackageDTO
+                ImageUrl = createNewPackageDTO.ImageUrl,
                 Bookings = new List<Booking>(),
                 Ratings = new List<Rating>(),
                 PackageMedia = createNewPackageDTO.PackageMedia?.Select(pm => new PackageMedia { ImageURL = pm.ImageURL, MediaType = pm.MediaType }).ToList(),
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                LodgingInfo = lodgingInfo,
+                DiscountPercent = createNewPackageDTO.DiscountPercent
             };
             var result = await _packageRepository.CreateNewPackageAsync(package);
             return result;
@@ -78,14 +105,42 @@ namespace travel_agency_back.Services
                 {
                     Id = r.Id,
                     Rating = r.Stars,
-                    Comment = r.Comment
+                    Comment = r.Comment,
+                    UserName = r.User?.UserName,
+                    UserEmail = r.User?.Email,
+                    CreatedAt = r.CreatedAt
                 }).ToList(),
                 PackageMedia = p.PackageMedia?.Select(pm => new PackageMediaResponseDTO
                 {
                     Id = pm.Id,
                     MediaType = pm.MediaType,
                     MediaUrl = pm.ImageURL
-                }).ToList()
+                }).ToList(),
+                DiscountPercent = p.DiscountPercent,
+                LodgingInfo = p.LodgingInfo == null ? null : new travel_agency_back.DTOs.Packages.LodgingInfoDTO
+                {
+                    Baths = p.LodgingInfo.Baths,
+                    Beds = p.LodgingInfo.Beds,
+                    WifiIncluded = p.LodgingInfo.WifiIncluded,
+                    ParkingSpot = p.LodgingInfo.ParkingSpot,
+                    SwimmingPool = p.LodgingInfo.SwimmingPool,
+                    FitnessCenter = p.LodgingInfo.FitnessCenter,
+                    RestaurantOnSite = p.LodgingInfo.RestaurantOnSite,
+                    PetAllowed = p.LodgingInfo.PetAllowed,
+                    AirConditioned = p.LodgingInfo.AirConditioned,
+                    Breakfast = p.LodgingInfo.Breakfast,
+                    Location = new travel_agency_back.DTOs.Packages.AddressDTO
+                    {
+                        Street = p.LodgingInfo.Street,
+                        Number = p.LodgingInfo.Number,
+                        Neighborhood = p.LodgingInfo.Neighborhood,
+                        City = p.LodgingInfo.City,
+                        State = p.LodgingInfo.State,
+                        Country = p.LodgingInfo.Country,
+                        ZipCode = p.LodgingInfo.ZipCode,
+                        Complement = p.LodgingInfo.Complement
+                    }
+                }
             });
         }
 
@@ -108,14 +163,42 @@ namespace travel_agency_back.Services
                 {
                     Id = r.Id,
                     Rating = r.Stars,
-                    Comment = r.Comment
+                    Comment = r.Comment,
+                    UserName = r.User?.UserName,
+                    UserEmail = r.User?.Email,
+                    CreatedAt = r.CreatedAt
                 }).ToList(),
                 PackageMedia = p.PackageMedia?.Select(pm => new PackageMediaResponseDTO
                 {
                     Id = pm.Id,
                     MediaType = pm.MediaType,
                     MediaUrl = pm.ImageURL
-                }).ToList()
+                }).ToList(),
+                DiscountPercent = p.DiscountPercent,
+                LodgingInfo = p.LodgingInfo == null ? null : new travel_agency_back.DTOs.Packages.LodgingInfoDTO
+                {
+                    Baths = p.LodgingInfo.Baths,
+                    Beds = p.LodgingInfo.Beds,
+                    WifiIncluded = p.LodgingInfo.WifiIncluded,
+                    ParkingSpot = p.LodgingInfo.ParkingSpot,
+                    SwimmingPool = p.LodgingInfo.SwimmingPool,
+                    FitnessCenter = p.LodgingInfo.FitnessCenter,
+                    RestaurantOnSite = p.LodgingInfo.RestaurantOnSite,
+                    PetAllowed = p.LodgingInfo.PetAllowed,
+                    AirConditioned = p.LodgingInfo.AirConditioned,
+                    Breakfast = p.LodgingInfo.Breakfast,
+                    Location = new travel_agency_back.DTOs.Packages.AddressDTO
+                    {
+                        Street = p.LodgingInfo.Street,
+                        Number = p.LodgingInfo.Number,
+                        Neighborhood = p.LodgingInfo.Neighborhood,
+                        City = p.LodgingInfo.City,
+                        State = p.LodgingInfo.State,
+                        Country = p.LodgingInfo.Country,
+                        ZipCode = p.LodgingInfo.ZipCode,
+                        Complement = p.LodgingInfo.Complement
+                    }
+                }
             };
         }
 
@@ -136,6 +219,7 @@ namespace travel_agency_back.Services
             if (package == null)
                 return new NotFoundObjectResult(new { Message = "Package not found" });
 
+            // Atualiza apenas os campos enviados
             if (dto.Name != null) package.Name = dto.Name;
             if (dto.Description != null) package.Description = dto.Description;
             if (dto.Price.HasValue) package.Price = dto.Price.Value;
@@ -148,8 +232,41 @@ namespace travel_agency_back.Services
             if (dto.Quantity.HasValue) package.Quantity = dto.Quantity.Value;
             if (dto.IsAvailable.HasValue) package.IsAvailable = dto.IsAvailable.Value;
             if (dto.ImageUrl != null) package.ImageUrl = dto.ImageUrl;
-            var result = await _packageRepository.UpdatePackageByIdAsync(packageID, package);
-            return result;
+
+            // Atualiza LodgingInfo se enviado
+            if (dto.LodgingInfo != null)
+            {
+                if (package.LodgingInfo == null)
+                {
+                    package.LodgingInfo = new LodgingInfo();
+                }
+                if (dto.LodgingInfo.Baths.HasValue) package.LodgingInfo.Baths = dto.LodgingInfo.Baths.Value;
+                if (dto.LodgingInfo.Beds.HasValue) package.LodgingInfo.Beds = dto.LodgingInfo.Beds.Value;
+                if (dto.LodgingInfo.WifiIncluded.HasValue) package.LodgingInfo.WifiIncluded = dto.LodgingInfo.WifiIncluded.Value;
+                if (dto.LodgingInfo.ParkingSpot.HasValue) package.LodgingInfo.ParkingSpot = dto.LodgingInfo.ParkingSpot.Value;
+                if (dto.LodgingInfo.SwimmingPool.HasValue) package.LodgingInfo.SwimmingPool = dto.LodgingInfo.SwimmingPool.Value;
+                if (dto.LodgingInfo.FitnessCenter.HasValue) package.LodgingInfo.FitnessCenter = dto.LodgingInfo.FitnessCenter.Value;
+                if (dto.LodgingInfo.RestaurantOnSite.HasValue) package.LodgingInfo.RestaurantOnSite = dto.LodgingInfo.RestaurantOnSite.Value;
+                if (dto.LodgingInfo.PetAllowed.HasValue) package.LodgingInfo.PetAllowed = dto.LodgingInfo.PetAllowed.Value;
+                if (dto.LodgingInfo.AirConditioned.HasValue) package.LodgingInfo.AirConditioned = dto.LodgingInfo.AirConditioned.Value;
+                if (dto.LodgingInfo.Breakfast.HasValue) package.LodgingInfo.Breakfast = dto.LodgingInfo.Breakfast.Value;
+                if (dto.LodgingInfo.Location != null)
+                {
+                    if (!string.IsNullOrEmpty(dto.LodgingInfo.Location.Street)) package.LodgingInfo.Street = dto.LodgingInfo.Location.Street;
+                    if (!string.IsNullOrEmpty(dto.LodgingInfo.Location.Number)) package.LodgingInfo.Number = dto.LodgingInfo.Location.Number;
+                    if (!string.IsNullOrEmpty(dto.LodgingInfo.Location.Neighborhood)) package.LodgingInfo.Neighborhood = dto.LodgingInfo.Location.Neighborhood;
+                    if (!string.IsNullOrEmpty(dto.LodgingInfo.Location.City)) package.LodgingInfo.City = dto.LodgingInfo.Location.City;
+                    if (!string.IsNullOrEmpty(dto.LodgingInfo.Location.State)) package.LodgingInfo.State = dto.LodgingInfo.Location.State;
+                    if (!string.IsNullOrEmpty(dto.LodgingInfo.Location.Country)) package.LodgingInfo.Country = dto.LodgingInfo.Location.Country;
+                    if (!string.IsNullOrEmpty(dto.LodgingInfo.Location.ZipCode)) package.LodgingInfo.ZipCode = dto.LodgingInfo.Location.ZipCode;
+                    if (!string.IsNullOrEmpty(dto.LodgingInfo.Location.Complement)) package.LodgingInfo.Complement = dto.LodgingInfo.Location.Complement;
+                }
+                // Marcar LodgingInfo como modificado
+                _packageRepository.MarkLodgingInfoAsModified(package.LodgingInfo);
+            }
+
+            await _packageRepository.SaveChangesAsync();
+            return new OkObjectResult(new { Message = "Alterações salvas com sucesso." });
         }
 
         async Task<IActionResult> IAdminService.UpdatePackageByIdAsync(int packageId, UpdatePackageDTO dto)
@@ -244,7 +361,40 @@ namespace travel_agency_back.Services
                 Payment = b.Payments?.Select(p => new PaymentResponseDTO
                 {
                     PaymentMethod = p.PaymentMethod
-                }).ToList() ?? new List<PaymentResponseDTO>()
+                }).ToList() ?? new List<PaymentResponseDTO>(),
+                LodgingInfo = b.Package?.LodgingInfo == null ? null : new travel_agency_back.DTOs.Packages.LodgingInfoDTO
+                {
+                    Baths = b.Package.LodgingInfo.Baths,
+                    Beds = b.Package.LodgingInfo.Beds,
+                    WifiIncluded = b.Package.LodgingInfo.WifiIncluded,
+                    ParkingSpot = b.Package.LodgingInfo.ParkingSpot,
+                    SwimmingPool = b.Package.LodgingInfo.SwimmingPool,
+                    FitnessCenter = b.Package.LodgingInfo.FitnessCenter,
+                    RestaurantOnSite = b.Package.LodgingInfo.RestaurantOnSite,
+                    PetAllowed = b.Package.LodgingInfo.PetAllowed,
+                    AirConditioned = b.Package.LodgingInfo.AirConditioned,
+                    Breakfast = b.Package.LodgingInfo.Breakfast,
+                    Location = new travel_agency_back.DTOs.Packages.AddressDTO
+                    {
+                        Street = b.Package.LodgingInfo.Street,
+                        Number = b.Package.LodgingInfo.Number,
+                        Neighborhood = b.Package.LodgingInfo.Neighborhood,
+                        City = b.Package.LodgingInfo.City,
+                        State = b.Package.LodgingInfo.State,
+                        Country = b.Package.LodgingInfo.Country,
+                        ZipCode = b.Package.LodgingInfo.ZipCode,
+                        Complement = b.Package.LodgingInfo.Complement
+                    }
+                },
+                DiscountPercent = b.Package?.DiscountPercent,
+                ContractingUser = b.User == null ? null : new UserSummaryDTO
+                {
+                    Id = b.User.Id,
+                    FirstName = b.User.FirstName,
+                    LastName = b.User.LastName,
+                    Email = b.User.Email,
+                    CPFPassport = b.User.CPFPassport
+                }
             });
         }
 

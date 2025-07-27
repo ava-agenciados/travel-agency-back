@@ -29,6 +29,14 @@ namespace travel_agency_back.Repositories
 
         public async Task<IActionResult> CreateNewPackageAsync(Packages package)
         {
+            // Se LodgingInfo existir, salva primeiro para garantir o Id autoincrementado
+            if (package.LodgingInfo != null)
+            {
+                _context.LodgingInfos.Add(package.LodgingInfo);
+                await _context.SaveChangesAsync();
+                package.LodgingInfoId = package.LodgingInfo.Id;
+            }
+
             var newPackage = new Packages
             {
                 Name = package.Name,
@@ -46,22 +54,28 @@ namespace travel_agency_back.Repositories
                 Bookings = new List<Booking>(),
                 Ratings = new List<Rating>(),
                 PackageMedia = package.PackageMedia?.Select(pm => new PackageMedia { ImageURL = pm.ImageURL, MediaType = pm.MediaType }).ToList(),
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                LodgingInfoId = package.LodgingInfoId,
+                DiscountPercent = package.DiscountPercent
             };
             _context.Packages.Add(newPackage);
-            _context.SaveChanges();
-            return await Task.FromResult<IActionResult>(new OkObjectResult(newPackage));
+            await _context.SaveChangesAsync();
+            return new OkObjectResult(newPackage);
         }
 
         public async Task<IActionResult> DeletePackageByIdAsync(int packageID)
         {
-            var package = _context.Packages.Find(packageID);
+            var package = _context.Packages.Include(p => p.LodgingInfo).FirstOrDefault(p => p.Id == packageID);
             if (package == null)
             {
                 return await Task.FromResult<IActionResult>(new NotFoundObjectResult(new { Message = "Pacote não encontrado" }));
             }
+            if (package.LodgingInfo != null)
+            {
+                _context.LodgingInfos.Remove(package.LodgingInfo);
+            }
             _context.Packages.Remove(package);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return await Task.FromResult<IActionResult>(new OkObjectResult(new { Message = "Pacote deletado com sucesso" }));
         }
 
@@ -79,6 +93,7 @@ namespace travel_agency_back.Repositories
                 .Include(p => p.Bookings)
                 .Include(p => p.Ratings).ThenInclude(r => r.User)
                 .Include(p => p.PackageMedia)
+                .Include(p => p.LodgingInfo) // Inclui LodgingInfo
                 .Where(p => p.IsAvailable)
                 .ToListAsync();
             return packages;
@@ -90,6 +105,7 @@ namespace travel_agency_back.Repositories
                 .Include(p => p.Ratings)
                 .Include(p => p.PackageMedia)
                 .Include(p => p.Bookings)
+                .Include(p => p.LodgingInfo) // Inclui LodgingInfo
                 .Where(p => p.Ratings.Any()) // Apenas pacotes com avaliações
                 .OrderByDescending(p => p.Ratings.Average(r => r.Stars))
                 .ThenByDescending(p => p.Ratings.Count)
@@ -103,6 +119,7 @@ namespace travel_agency_back.Repositories
                 .Include(p => p.Bookings)
                 .Include(p => p.Ratings)
                 .Include(p => p.PackageMedia)
+                .Include(p => p.LodgingInfo) // Inclui LodgingInfo
                 .Where(p => p.IsAvailable)
                 .FirstOrDefaultAsync(p => p.Id == packageID);
             if (package == null)
@@ -118,6 +135,7 @@ namespace travel_agency_back.Repositories
                 .Include(p => p.Bookings)
                 .Include(p => p.Ratings)
                 .Include(p => p.PackageMedia)
+                .Include(p => p.LodgingInfo) // Inclui LodgingInfo
                 .Where(p => p.IsAvailable)
                 .AsQueryable();
 
@@ -138,6 +156,7 @@ namespace travel_agency_back.Repositories
 
         public async Task<IActionResult> SaveChangesAsync()
         {
+            // Apenas salva as alterações já rastreadas e marcadas como modificadas
             var result = await _context.SaveChangesAsync();
             if (result > 0)
             {
@@ -151,11 +170,15 @@ namespace travel_agency_back.Repositories
 
         public async Task<IActionResult> UpdatePackageByIdAsync(int packageID, Packages package)
         {
-            var existingPackage = _context.Packages.Find(packageID);
+            // Busca o pacote com rastreamento e inclui LodgingInfo
+            var existingPackage = await _context.Packages
+                .Include(p => p.LodgingInfo)
+                .FirstOrDefaultAsync(p => p.Id == packageID);
             if (existingPackage == null)
             {
-                return await Task.FromResult<IActionResult>(new NotFoundObjectResult(new { Message = "Pacote não encontrado" }));
+                return new NotFoundObjectResult(new { Message = "Pacote não encontrado" });
             }
+            // Atualiza os campos já preparados pelo AdminService
             existingPackage.Name = package.Name;
             existingPackage.Description = package.Description;
             existingPackage.Origin = package.Origin;
@@ -168,10 +191,12 @@ namespace travel_agency_back.Repositories
             existingPackage.Quantity = package.Quantity;
             existingPackage.IsAvailable = package.IsAvailable;
             existingPackage.ImageUrl = package.ImageUrl;
-            existingPackage.PackageMedia = package.PackageMedia?.Select(pm => new PackageMedia { ImageURL = pm.ImageURL, MediaType = pm.MediaType }).ToList() ?? new List<PackageMedia>();
+            if (package.PackageMedia != null && package.PackageMedia.Any())
+                existingPackage.PackageMedia = package.PackageMedia.Select(pm => new PackageMedia { ImageURL = pm.ImageURL, MediaType = pm.MediaType }).ToList();
+            // NÃO atualiza LodgingInfo aqui, pois já foi atualizado campo a campo no Service
             _context.Packages.Update(existingPackage);
-            _context.SaveChanges();
-            return await Task.FromResult<IActionResult>(new OkObjectResult(existingPackage));
+            await _context.SaveChangesAsync();
+            return new OkObjectResult(existingPackage);
         }
         public async Task<IActionResult> DeleteRating(int ratingId)
         {
@@ -183,6 +208,15 @@ namespace travel_agency_back.Repositories
             _context.Rating.Remove(rating);
             await _context.SaveChangesAsync();
             return new OkObjectResult(new { Message = "Avaliação deletada com sucesso" });
+        }
+
+        public void MarkLodgingInfoAsModified(LodgingInfo lodgingInfo)
+        {
+            if (_context.Entry(lodgingInfo).State == EntityState.Detached)
+            {
+                _context.LodgingInfos.Attach(lodgingInfo);
+            }
+            _context.Entry(lodgingInfo).State = EntityState.Modified;
         }
     }
 }

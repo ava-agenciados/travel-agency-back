@@ -2,7 +2,6 @@
 {
     public class PackageDTO
     {
-
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
@@ -14,8 +13,10 @@
         public DateTime BeginDate { get; set; }
         public DateTime EndDate { get; set; }
         public int Quantity { get; set; }
-        public bool IsAvailable { get; set; }//
-        public string ImageUrl { get; set; } // Assuming ImageUrl is a string
+        public bool IsAvailable { get; set; }
+        public string ImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }
+        public double? DiscountPercent { get; set; } // NOVO: desconto
+        public travel_agency_back.DTOs.Packages.LodgingInfoDTO? LodgingInfo { get; set; } // NOVO: info de acomodação
     }
 }

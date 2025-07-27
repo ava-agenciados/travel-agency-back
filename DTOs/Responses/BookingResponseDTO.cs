@@ -8,5 +8,17 @@
         public string Status { get; set; }
         public List<CompanionResponseDTO> Companion { get; set; } = new ();
         public List<PaymentResponseDTO> Payment { get; set; }
+        public travel_agency_back.DTOs.Packages.LodgingInfoDTO? LodgingInfo { get; set; } // NOVO: info de acomodação do pacote
+        public double? DiscountPercent { get; set; } // NOVO: desconto do pacote
+        public UserSummaryDTO? ContractingUser { get; set; } // NOVO: informações do contratante
+    }
+
+    public class UserSummaryDTO
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string CPFPassport { get; set; }
     }
 }

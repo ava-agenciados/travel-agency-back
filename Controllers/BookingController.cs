@@ -60,7 +60,32 @@ namespace travel_agency_back.Controllers
                 Payment = b.Payments?.Select(p => new PaymentResponseDTO
                 {
                     PaymentMethod = p.PaymentMethod
-                }).ToList()
+                }).ToList(),
+                LodgingInfo = b.Package?.LodgingInfo == null ? null : new travel_agency_back.DTOs.Packages.LodgingInfoDTO
+                {
+                    Baths = b.Package.LodgingInfo.Baths,
+                    Beds = b.Package.LodgingInfo.Beds,
+                    WifiIncluded = b.Package.LodgingInfo.WifiIncluded,
+                    ParkingSpot = b.Package.LodgingInfo.ParkingSpot,
+                    SwimmingPool = b.Package.LodgingInfo.SwimmingPool,
+                    FitnessCenter = b.Package.LodgingInfo.FitnessCenter,
+                    RestaurantOnSite = b.Package.LodgingInfo.RestaurantOnSite,
+                    PetAllowed = b.Package.LodgingInfo.PetAllowed,
+                    AirConditioned = b.Package.LodgingInfo.AirConditioned,
+                    Breakfast = b.Package.LodgingInfo.Breakfast,
+                    Location = new travel_agency_back.DTOs.Packages.AddressDTO
+                    {
+                        Street = b.Package.LodgingInfo.Street,
+                        Number = b.Package.LodgingInfo.Number,
+                        Neighborhood = b.Package.LodgingInfo.Neighborhood,
+                        City = b.Package.LodgingInfo.City,
+                        State = b.Package.LodgingInfo.State,
+                        Country = b.Package.LodgingInfo.Country,
+                        ZipCode = b.Package.LodgingInfo.ZipCode,
+                        Complement = b.Package.LodgingInfo.Complement
+                    }
+                },
+                DiscountPercent = b.Package?.DiscountPercent
             }).ToList();
 
             return Task.FromResult<IActionResult>(Ok(response));

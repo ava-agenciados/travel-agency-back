@@ -59,6 +59,8 @@ namespace travel_agency_back.Repositories
                 .Where(b => b.UserId == userId)
                 .Include(b => b.Companions)
                 .Include(b => b.Payments)
+                .Include(b => b.Package)
+                .ThenInclude(p => p.LodgingInfo)
                 .ToListAsync();
             return bookings;
         }
@@ -111,6 +113,9 @@ namespace travel_agency_back.Repositories
             var result = await _context.Bookings
                 .Include(b => b.Companions)
                 .Include(b => b.Payments)
+                .Include(b => b.Package)
+                .ThenInclude(p => p.LodgingInfo)
+                .Include(b => b.User)
                 .ToListAsync();
             return result;
         }

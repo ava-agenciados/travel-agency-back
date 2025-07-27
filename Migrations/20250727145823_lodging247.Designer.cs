@@ -12,8 +12,8 @@ using travel_agency_back.Data;
 namespace travel_agency_back.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250717163725_BookingDB")]
-    partial class BookingDB
+    [Migration("20250727145823_lodging247")]
+    partial class lodging247
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -172,6 +172,21 @@ namespace travel_agency_back.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal>("FinalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("HasActivities")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasTour")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasTourGuide")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("HasTravelInsurance")
+                        .HasColumnType("bit");
+
                     b.Property<int>("PackageId")
                         .HasColumnType("int");
 
@@ -224,6 +239,80 @@ namespace travel_agency_back.Migrations
                     b.HasIndex("BookingId");
 
                     b.ToTable("Companions");
+                });
+
+            modelBuilder.Entity("travel_agency_back.Models.LodgingInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AirConditioned")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Baths")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Beds")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Breakfast")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Complement")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("FitnessCenter")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Neighborhood")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("ParkingSpot")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("PetAllowed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("RestaurantOnSite")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Street")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SwimmingPool")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("WifiIncluded")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ZipCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LodgingInfos");
                 });
 
             modelBuilder.Entity("travel_agency_back.Models.PackageMedia", b =>
@@ -282,6 +371,9 @@ namespace travel_agency_back.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<double?>("DiscountPercent")
+                        .HasColumnType("float");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
 
@@ -292,6 +384,9 @@ namespace travel_agency_back.Migrations
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("LodgingInfoId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -301,12 +396,17 @@ namespace travel_agency_back.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LodgingInfoId")
+                        .IsUnique()
+                        .HasFilter("[LodgingInfoId] IS NOT NULL");
 
                     b.ToTable("Packages");
                 });
@@ -349,6 +449,7 @@ namespace travel_agency_back.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("BookingId")
@@ -618,6 +719,16 @@ namespace travel_agency_back.Migrations
                     b.Navigation("Package");
                 });
 
+            modelBuilder.Entity("travel_agency_back.Models.Packages", b =>
+                {
+                    b.HasOne("travel_agency_back.Models.LodgingInfo", "LodgingInfo")
+                        .WithOne("Package")
+                        .HasForeignKey("travel_agency_back.Models.Packages", "LodgingInfoId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("LodgingInfo");
+                });
+
             modelBuilder.Entity("travel_agency_back.Models.PaymentLogs", b =>
                 {
                     b.HasOne("travel_agency_back.Models.Payments", "Payment")
@@ -675,6 +786,12 @@ namespace travel_agency_back.Migrations
                     b.Navigation("Companions");
 
                     b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("travel_agency_back.Models.LodgingInfo", b =>
+                {
+                    b.Navigation("Package")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("travel_agency_back.Models.Packages", b =>

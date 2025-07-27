@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using travel_agency_back.DTOs.Packages;
 using travel_agency_back.Models;
 
 namespace travel_agency_back.Data
@@ -112,27 +113,49 @@ namespace travel_agency_back.Data
             // Adiciona pacotes de exemplo se não existirem
             if (!await dbContext.Packages.AnyAsync())
             {
-                var pacotes = new List<Packages>
+                // Cria LodgingInfo como entidades separadas
+                var lodgingList = new List<LodgingInfo>
                 {
-                    // Nacionais
-                    new Packages { Name = "Pacote Verão", Description = "Viagem para o Rio de Janeiro", Price = 1500, ImageUrl = "https://images.pexels.com/photos/351283/pexels-photo-351283.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(2), BeginDate = DateTime.Now.AddDays(10), EndDate = DateTime.Now.AddDays(17), Origin = "São Paulo", Destination = "Rio de Janeiro", Quantity = 20, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Carnaval", Description = "Viagem para Salvador", Price = 2000, ImageUrl = "https://images.pexels.com/photos/3700900/pexels-photo-3700900.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(3), BeginDate = DateTime.Now.AddDays(20), EndDate = DateTime.Now.AddDays(27), Origin = "Belo Horizonte", Destination = "Salvador", Quantity = 15, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Praia", Description = "Viagem para Florianópolis", Price = 1800, ImageUrl = "https://images.pexels.com/photos/164631/pexels-photo-164631.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(1), BeginDate = DateTime.Now.AddDays(5), EndDate = DateTime.Now.AddDays(12), Origin = "Curitiba", Destination = "Florianópolis", Quantity = 10, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Amazônia", Description = "Exploração na Floresta Amazônica", Price = 2500, ImageUrl = "https://images.pexels.com/photos/2739664/pexels-photo-2739664.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(4), BeginDate = DateTime.Now.AddDays(15), EndDate = DateTime.Now.AddDays(22), Origin = "Manaus", Destination = "Amazônia", Quantity = 8, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Pantanal", Description = "Ecoturismo no Pantanal", Price = 2200, ImageUrl = "https://images.pexels.com/photos/221436/pexels-photo-221436.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(2), BeginDate = DateTime.Now.AddDays(18), EndDate = DateTime.Now.AddDays(25), Origin = "Campo Grande", Destination = "Pantanal", Quantity = 12, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Foz do Iguaçu", Description = "Visita às Cataratas do Iguaçu", Price = 1700, ImageUrl = "https://images.pexels.com/photos/1232766/pexels-photo-1232766.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(2), BeginDate = DateTime.Now.AddDays(8), EndDate = DateTime.Now.AddDays(15), Origin = "Curitiba", Destination = "Foz do Iguaçu", Quantity = 14, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Chapada Diamantina", Description = "Aventura na Chapada Diamantina", Price = 2100, ImageUrl = "https://images.pexels.com/photos/21047000/pexels-photo-21047000.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(3), BeginDate = DateTime.Now.AddDays(12), EndDate = DateTime.Now.AddDays(19), Origin = "Salvador", Destination = "Chapada Diamantina", Quantity = 9, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Lençóis Maranhenses", Description = "Passeio pelos Lençóis Maranhenses", Price = 2300, ImageUrl = "https://images.pexels.com/photos/19151869/pexels-photo-19151869.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(2), BeginDate = DateTime.Now.AddDays(14), EndDate = DateTime.Now.AddDays(21), Origin = "São Luís", Destination = "Lençóis Maranhenses", Quantity = 11, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Bonito", Description = "Ecoturismo em Bonito", Price = 1950, ImageUrl = "https://images.pexels.com/photos/10797273/pexels-photo-10797273.png", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(2), BeginDate = DateTime.Now.AddDays(9), EndDate = DateTime.Now.AddDays(16), Origin = "Campo Grande", Destination = "Bonito", Quantity = 13, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Recife e Olinda", Description = "Carnaval em Recife e Olinda", Price = 1600, ImageUrl = "https://images.pexels.com/photos/20538562/pexels-photo-20538562.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(2), BeginDate = DateTime.Now.AddDays(11), EndDate = DateTime.Now.AddDays(18), Origin = "Recife", Destination = "Olinda", Quantity = 16, CreatedAt = DateTime.Now, IsAvailable = true },
-
-                    // Internacionais
-                    new Packages { Name = "Pacote Paris", Description = "Viagem romântica para Paris", Price = 7000, ImageUrl = "https://images.pexels.com/photos/1308940/pexels-photo-1308940.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(6), BeginDate = DateTime.Now.AddDays(30), EndDate = DateTime.Now.AddDays(37), Origin = "São Paulo", Destination = "Paris", Quantity = 6, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Nova York", Description = "Turismo em Nova York", Price = 8000, ImageUrl = "https://images.pexels.com/photos/466685/pexels-photo-466685.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(6), BeginDate = DateTime.Now.AddDays(40), EndDate = DateTime.Now.AddDays(47), Origin = "Rio de Janeiro", Destination = "Nova York", Quantity = 7, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Lisboa", Description = "Conheça a capital portuguesa", Price = 6500, ImageUrl = "https://images.pexels.com/photos/33145898/pexels-photo-33145898.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(5), BeginDate = DateTime.Now.AddDays(35), EndDate = DateTime.Now.AddDays(42), Origin = "Salvador", Destination = "Lisboa", Quantity = 8, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Buenos Aires", Description = "Passeio cultural em Buenos Aires", Price = 4000, ImageUrl = "https://images.pexels.com/photos/16228260/pexels-photo-16228260.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(4), BeginDate = DateTime.Now.AddDays(25), EndDate = DateTime.Now.AddDays(32), Origin = "Porto Alegre", Destination = "Buenos Aires", Quantity = 10, CreatedAt = DateTime.Now, IsAvailable = true },
-                    new Packages { Name = "Pacote Santiago", Description = "Viagem para Santiago do Chile", Price = 4200, ImageUrl = "https://images.pexels.com/photos/2017747/pexels-photo-2017747.jpeg", ActiveFrom = DateTime.Now, ActiveUntil = DateTime.Now.AddMonths(4), BeginDate = DateTime.Now.AddDays(28), EndDate = DateTime.Now.AddDays(35), Origin = "São Paulo", Destination = "Santiago", Quantity = 9, CreatedAt = DateTime.Now, IsAvailable = true }
+                    new LodgingInfo { Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Av. Atlântica", Number = "1702", Neighborhood = "Copacabana", City = "Rio de Janeiro", State = "RJ", Country = "Brasil", ZipCode = "22021-001", Complement = "Apto 101" },
+                    new LodgingInfo { Baths = 1, Beds = 3, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Av. Sete de Setembro", Number = "1000", Neighborhood = "Centro", City = "Salvador", State = "BA", Country = "Brasil", ZipCode = "40060-001", Complement = null },
+                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = false, RestaurantOnSite = false, PetAllowed = true, AirConditioned = true, Breakfast = false, Street = "Rua das Gaivotas", Number = "500", Neighborhood = "Ingleses", City = "Florianópolis", State = "SC", Country = "Brasil", ZipCode = "88058-500", Complement = null },
+                    new LodgingInfo { Baths = 1, Beds = 1, WifiIncluded = false, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = false, Breakfast = true, Street = "Estrada do Turismo", Number = "S/N", Neighborhood = "Tarumã", City = "Manaus", State = "AM", Country = "Brasil", ZipCode = "69041-010", Complement = null },
+                    new LodgingInfo { Baths = 1, Beds = 3, WifiIncluded = false, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = true, AirConditioned = false, Breakfast = true, Street = "Estrada do Pantanal", Number = "S/N", Neighborhood = "Zona Rural", City = "Corumbá", State = "MS", Country = "Brasil", ZipCode = "79304-000", Complement = null },
+                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Av. das Cataratas", Number = "6798", Neighborhood = "Vila Yolanda", City = "Foz do Iguaçu", State = "PR", Country = "Brasil", ZipCode = "85853-000", Complement = null },
+                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = false, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = false, PetAllowed = true, AirConditioned = false, Breakfast = false, Street = "Rua do Vale", Number = "300", Neighborhood = "Lençóis", City = "Lençóis", State = "BA", Country = "Brasil", ZipCode = "46960-000", Complement = null },
+                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = true, AirConditioned = true, Breakfast = true, Street = "Rua Pilád Rebuá", Number = "1835", Neighborhood = "Centro", City = "Bonito", State = "MS", Country = "Brasil", ZipCode = "79290-000", Complement = null },
+                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Rua do Amparo", Number = "100", Neighborhood = "Amparo", City = "Olinda", State = "PE", Country = "Brasil", ZipCode = "53025-080", Complement = null },
+                    new LodgingInfo { Baths = 1, Beds = 1, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Rue de Rivoli", Number = "45", Neighborhood = "1er Arrondissement", City = "Paris", State = "Île-de-France", Country = "França", ZipCode = "75001", Complement = "Quarto 12" },
+                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "5th Avenue", Number = "700", Neighborhood = "Manhattan", City = "New York", State = "NY", Country = "EUA", ZipCode = "10019", Complement = null },
+                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Avenida da Liberdade", Number = "250", Neighborhood = "Avenida", City = "Lisboa", State = "Lisboa", Country = "Portugal", ZipCode = "1250-147", Complement = null },
+                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Avenida 9 de Julio", Number = "1000", Neighborhood = "Centro", City = "Buenos Aires", State = "CABA", Country = "Argentina", ZipCode = "1043", Complement = null },
+                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = false, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Avenida Libertador", Number = "1234", Neighborhood = "Providencia", City = "Santiago", State = "Región Metropolitana", Country = "Chile", ZipCode = "7500000", Complement = null }
                 };
+                dbContext.LodgingInfos.AddRange(lodgingList);
+                await dbContext.SaveChangesAsync();
+
+                var pacotes = new List<Packages>();
+                for (int i = 0; i < lodgingList.Count; i++)
+                {
+                    pacotes.Add(new Packages
+                    {
+                        Name = $"Pacote {i + 1}",
+                        Description = $"Descrição do pacote {i + 1}",
+                        Price = 1000 + i * 100,
+                        ImageUrl = $"https://example.com/image{i + 1}.jpg",
+                        ActiveFrom = DateTime.Now,
+                        ActiveUntil = DateTime.Now.AddMonths(2),
+                        BeginDate = DateTime.Now.AddDays(10 + i),
+                        EndDate = DateTime.Now.AddDays(17 + i),
+                        Origin = "Origem",
+                        Destination = "Destino",
+                        Quantity = 10 + i,
+                        CreatedAt = DateTime.Now,
+                        IsAvailable = true,
+                        DiscountPercent = 5 + i,
+                        LodgingInfoId = lodgingList[i].Id
+                    });
+                }
                 dbContext.Packages.AddRange(pacotes);
                 await dbContext.SaveChangesAsync();
             }

@@ -27,6 +27,7 @@ namespace travel_agency_back.Repositories.Interfaces
 
         public Task<List<string>> GetAllDestinations();
 
+        public void MarkLodgingInfoAsModified(LodgingInfo lodgingInfo);
 
 
 

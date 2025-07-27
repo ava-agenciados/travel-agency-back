@@ -16,5 +16,11 @@
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // Data e hora de criação da reserva
         public ICollection<Companions> Companions { get; set; } = new List<Companions>(); // Lista de acompanhantes associados à reserva
         public ICollection<Payments> Payments { get; set; } = new List<Payments>(); // Lista de pagamentos associados à reserva
+        // Opcionais
+        public bool HasTravelInsurance { get; set; }
+        public bool HasTourGuide { get; set; }
+        public bool HasTour { get; set; }
+        public bool HasActivities { get; set; }
+        public decimal FinalPrice { get; set; } // Valor final calculado
     }
 }

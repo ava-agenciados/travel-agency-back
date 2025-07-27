@@ -114,9 +114,9 @@ namespace travel_agency_back.Controllers
         )]
         [HttpPost("packages/{packageId}/add-midia")]
         [Authorize(Roles = "Admin, Atendente")]
-        public async Task<IActionResult> UploadMediaToPackage(int packageID, [FromForm] List<IFormFile> uploadMedia)
+        public async Task<IActionResult> UploadMediaToPackage(int packageId, [FromForm] List<IFormFile> media)
         {
-            var result = await _mediaService.UploadMediaAsync(packageID, uploadMedia);
+            var result = await _mediaService.UploadMediaAsync(packageId, media);
             if (result is BadRequestObjectResult)
             {
                 return BadRequest(new GenericResponseDTO(400, "Formato de midia não autorizado", false));

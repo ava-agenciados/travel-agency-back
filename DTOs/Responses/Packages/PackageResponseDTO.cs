@@ -41,5 +41,7 @@
         public List<PackageRatingResponseDTO>? Ratings { get; set; }
 
         public List<PackageMediaResponseDTO>? PackageMedia { get; set; }
+        public double? DiscountPercent { get; set; } // NOVO: desconto
+        public travel_agency_back.DTOs.Packages.LodgingInfoDTO? LodgingInfo { get; set; } // NOVO: info de acomodação
     }
 }

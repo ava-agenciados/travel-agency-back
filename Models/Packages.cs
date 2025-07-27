@@ -1,4 +1,7 @@
-﻿namespace travel_agency_back.Models
+﻿using travel_agency_back.DTOs.Packages;
+using travel_agency_back.Models;
+
+namespace travel_agency_back.Models
 {
 
 
@@ -29,5 +32,9 @@
 
         public ICollection<PackageMedia> PackageMedia { get; set; } // Coleção de mídias associadas ao pacote
 
+        // Novas propriedades
+        public int? LodgingInfoId { get; set; } // Chave estrangeira para LodgingInfo
+        public LodgingInfo? LodgingInfo { get; set; } // Entidade de acomodação
+        public double? DiscountPercent { get; set; } // Desconto percentual
     }
 }

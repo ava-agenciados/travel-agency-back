@@ -176,5 +176,18 @@ namespace travel_agency_back.Controllers
                 return BadRequest(new GenericResponseDTO(result.StatusCode, result.Message, false));
             }
         }
+        [SwaggerOperation(
+            Summary = "Atualiza um pacote turístico pelo ID",
+            Description = "Endpoint protegido, administradores e atendentes podem atualizar pacotes."
+        )]
+        [HttpPatch("packages/update/{packageId}")]
+        [Authorize(Roles = "Admin, Atendente")]
+        public async Task<IActionResult> UpdatePackage(int packageId, [FromBody] UpdatePackageDTO dto)
+        {
+            var result = await _adminService.UpdatePackageByIdAsync(packageId, dto);
+            if (result is NotFoundObjectResult)
+                return NotFound(new GenericResponseDTO(404, "Pacote não encontrado", false));
+            return Ok(new GenericResponseDTO(200, "Pacote atualizado com sucesso!", true));
+        }
     }
 }

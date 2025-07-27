@@ -76,7 +76,7 @@ namespace travel_agency_back.Services
                 Destination = p.Destination,
                 IsActive = p.IsAvailable,
                 Ratings = p.Ratings?
-                    .Where(r => r.IsAvailable) // Apenas comentários aprovados
+                    .Where(r => r.IsAvailable)
                     .Select(r => new PackageRatingResponseDTO
                     {
                         Id = r.Id,
@@ -94,7 +94,32 @@ namespace travel_agency_back.Services
                     Id = pm.Id,
                     MediaType = pm.MediaType,
                     MediaUrl = pm.ImageURL
-                }).ToList()
+                }).ToList(),
+                DiscountPercent = p.DiscountPercent,
+                LodgingInfo = p.LodgingInfo == null ? null : new DTOs.Packages.LodgingInfoDTO
+                {
+                    Baths = p.LodgingInfo.Baths,
+                    Beds = p.LodgingInfo.Beds,
+                    WifiIncluded = p.LodgingInfo.WifiIncluded,
+                    ParkingSpot = p.LodgingInfo.ParkingSpot,
+                    SwimmingPool = p.LodgingInfo.SwimmingPool,
+                    FitnessCenter = p.LodgingInfo.FitnessCenter,
+                    RestaurantOnSite = p.LodgingInfo.RestaurantOnSite,
+                    PetAllowed = p.LodgingInfo.PetAllowed,
+                    AirConditioned = p.LodgingInfo.AirConditioned,
+                    Breakfast = p.LodgingInfo.Breakfast,
+                    Location = new DTOs.Packages.AddressDTO
+                    {
+                        Street = p.LodgingInfo.Street,
+                        Number = p.LodgingInfo.Number,
+                        Neighborhood = p.LodgingInfo.Neighborhood,
+                        City = p.LodgingInfo.City,
+                        State = p.LodgingInfo.State,
+                        Country = p.LodgingInfo.Country,
+                        ZipCode = p.LodgingInfo.ZipCode,
+                        Complement = p.LodgingInfo.Complement
+                    }
+                }
             });
             return response;
         }
@@ -133,7 +158,32 @@ namespace travel_agency_back.Services
                     Id = pm.Id,
                     MediaType = pm.MediaType,
                     MediaUrl = pm.ImageURL
-                }).ToList()
+                }).ToList(),
+                DiscountPercent = p.DiscountPercent,
+                LodgingInfo = p.LodgingInfo == null ? null : new DTOs.Packages.LodgingInfoDTO
+                {
+                    Baths = p.LodgingInfo.Baths,
+                    Beds = p.LodgingInfo.Beds,
+                    WifiIncluded = p.LodgingInfo.WifiIncluded,
+                    ParkingSpot = p.LodgingInfo.ParkingSpot,
+                    SwimmingPool = p.LodgingInfo.SwimmingPool,
+                    FitnessCenter = p.LodgingInfo.FitnessCenter,
+                    RestaurantOnSite = p.LodgingInfo.RestaurantOnSite,
+                    PetAllowed = p.LodgingInfo.PetAllowed,
+                    AirConditioned = p.LodgingInfo.AirConditioned,
+                    Breakfast = p.LodgingInfo.Breakfast,
+                    Location = new DTOs.Packages.AddressDTO
+                    {
+                        Street = p.LodgingInfo.Street,
+                        Number = p.LodgingInfo.Number,
+                        Neighborhood = p.LodgingInfo.Neighborhood,
+                        City = p.LodgingInfo.City,
+                        State = p.LodgingInfo.State,
+                        Country = p.LodgingInfo.Country,
+                        ZipCode = p.LodgingInfo.ZipCode,
+                        Complement = p.LodgingInfo.Complement
+                    }
+                }
             }).ToList();
             return Task.FromResult(response);
         }

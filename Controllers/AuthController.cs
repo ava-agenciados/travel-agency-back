@@ -57,7 +57,6 @@ namespace travel_agency_back.Controllers
         [Route("auth/register")]
         public async Task<IActionResult> Register([FromBody] CreateUserRequestDTO userDTO)
         {
-            //Realiza a validação dos dados do usuário
             var UserRegister = await _authService.RegisterAsync(
                 userDTO.FirstName,
                 userDTO.LastName,
@@ -66,7 +65,7 @@ namespace travel_agency_back.Controllers
                 userDTO.CPFPassport,
                 userDTO.Password
             );
-            return Ok(UserRegister);
+            return StatusCode(UserRegister.StatusCode, UserRegister);
         }
 
         /// <summary>
