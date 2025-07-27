@@ -71,7 +71,42 @@ namespace travel_agency_back.Third_party.Mail
             return new OkObjectResult(new { message = "E-mail de confirmação do PIX enviado com sucesso!" });
         }
 
-        public static void SendBoletoEmail(string email, string FirstName, string LastName, string CPFPassport, decimal Amount, string NomePacotes, string Destino, string Origem, DateTime InicioViagem, DateTime FimViagem)
+        // NOVOS PARÂMETROS: basePrice, extrasValue, discount, finalPrice, optionalsList, packageFeatures
+        public static async Task<IActionResult> SendPixPaymentConfirmation(User user, PaymentDTO payment, Packages packages, Booking booking, ILogger logger, decimal basePrice, decimal extrasValue, decimal discount, decimal finalPrice, List<string> optionalsList, string packageFeatures)
+        {
+            //Configura o e-mail e o corpo da mensagem
+            MailMessage mail = new MailMessage();
+            mail.From = new MailAddress(_smtpUser);
+            mail.To.Add(addresses: user.Email);
+            mail.Subject = "✅ PIX Aprovado - Viagem Confirmada - NewHorizon";
+            mail.Body = GetPixEmailBody(
+                user.FirstName,
+                user.LastName,
+                user.CPFPassport,
+                finalPrice,
+                packages.Name,
+                packages.Destination,
+                packages.Origin,
+                booking.TravelDate,
+                booking.BookingDate,
+                payment.TransactionId.ToString(),
+                basePrice,
+                extrasValue,
+                discount,
+                finalPrice,
+                optionalsList,
+                packageFeatures
+            );
+            mail.IsBodyHtml = true;
+            //Configura o SMTP client
+            SmtpClient smtp = new SmtpClient(host: "smtp.gmail.com", 587);
+            smtp.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
+            smtp.EnableSsl = true;
+            await smtp.SendMailAsync(mail);
+            return new OkObjectResult(new { message = "E-mail de confirmação do PIX enviado com sucesso!" });
+        }
+
+        public static void SendBoletoEmail(string email, string FirstName, string LastName, string CPFPassport, decimal Amount, string NomePacotes, string Destino, string Origem, DateTime InicioViagem, DateTime FimViagem, decimal basePrice, decimal extrasValue, decimal discount, List<string> optionalsList, string packageFeatures)
         {
             // Gera dados simplificados do boleto (sem complexidade desnecessária)
             var codigoBarras = $"34191{Amount:00000000}{DateTime.UtcNow:yyyyMMdd}001234567890";
@@ -213,37 +248,8 @@ namespace travel_agency_back.Third_party.Mail
             smtp.Send(mail);
         }
 
-        public static async Task<IActionResult> SendPixPaymentConfirmation(User user, PaymentDTO payment, Packages packages, Booking booking, ILogger logger)
-        {
-            //Configura o e-mail e o corpo da mensagem
-            MailMessage mail = new MailMessage();
-            mail.From = new MailAddress(_smtpUser);
-            mail.To.Add(addresses: user.Email);
-            mail.Subject = "✅ PIX Aprovado - Viagem Confirmada - NewHorizon";
-            mail.Body = GetPixEmailBody(
-            user.FirstName, // do objeto User
-            user.LastName,  // do objeto User
-            user.CPFPassport, // do objeto User
-            packages.Price, // do objeto PaymentDTO (valor pago)
-            packages.Name, // do objeto PackageDTO (nome do pacote)
-            packages.Destination, // do objeto PackageDTO (destino)
-            packages.Origin, // do objeto PackageDTO (origem)
-            booking.TravelDate, // do objeto CreateNewBookingDTO (data início)
-            booking.BookingDate,   // do objeto CreateNewBookingDTO (data fim)
-            payment.TransactionId.ToString()); // do objeto PaymentDTO (id da transação PIX)
-            mail.IsBodyHtml = true;
-          
-            //Configura o SMTP client
-            SmtpClient smtp = new SmtpClient(host: "smtp.gmail.com", 587);
-            smtp.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
-            smtp.EnableSsl = true;
-
-            // Envia o e-mail
-            await smtp.SendMailAsync(mail);
-            return new OkObjectResult(new { message = "E-mail de confirmação do PIX enviado com sucesso!" });
-        }
-
-        public static void SendCartaoEmail(string email, string FirstName, string LastName, string CPFPassport, decimal Amount, string NomePacotes, string Destino, string Origem, DateTime InicioViagem, DateTime FimViagem, int parcelas, string status, string transactionId, travel_agency_back.Third_party.PaymentGateway.PaymentGateway.CardData? cardData = null)
+        // NOVOS PARÂMETROS: basePrice, extrasValue, discount, optionalsList, packageFeatures
+        public static void SendCartaoEmail(string email, string FirstName, string LastName, string CPFPassport, decimal Amount, string NomePacotes, string Destino, string Origem, DateTime InicioViagem, DateTime FimViagem, int parcelas, string status, string transactionId, travel_agency_back.Third_party.PaymentGateway.PaymentGateway.CardData? cardData = null, decimal basePrice = 0, decimal extrasValue = 0, decimal discount = 0, List<string> optionalsList = null, string packageFeatures = "")
         {
             // Determina se é crédito ou débito baseado nas parcelas
             bool isCredito = parcelas > 1;
@@ -478,12 +484,16 @@ namespace travel_agency_back.Third_party.Mail
             smtp.Credentials = new NetworkCredential(_smtpUser, _smtpPassword);
             smtp.EnableSsl = true;
 
-             await smtp.SendMailAsync(mail);
-             return new OkObjectResult(new { message = "E-mail de confirmação de conta enviado com sucesso!" });
+            await smtp.SendMailAsync(mail);
+            return new OkObjectResult(new { message = "E-mail de confirmação de conta enviado com sucesso!" });
         }
 
-        private static string GetPixEmailBody(string FirstName, string LastName, string CPFPassport, decimal Amount, string NomePacotes, string Destino, string Origem, DateTime InicioViagem, DateTime FimViagem, string pixCode)
+        private static string GetPixEmailBody(string FirstName, string LastName, string CPFPassport, decimal Amount, string NomePacotes, string Destino, string Origem, DateTime InicioViagem, DateTime FimViagem, string pixCode, decimal basePrice, decimal extrasValue, decimal discount, decimal finalPrice, List<string> optionalsList, string packageFeatures)
         {
+            // Monta HTML detalhado com características, opcionais, desconto e cálculo
+            string optionalsHtml = optionalsList != null && optionalsList.Count > 0
+                ? string.Join("<br>", optionalsList.Select(o => $"- {o} (+2%)"))
+                : "Nenhum opcional selecionado";
             return $@"
 <!DOCTYPE html>
 <html lang='pt-br'>
@@ -507,9 +517,9 @@ namespace travel_agency_back.Third_party.Mail
                     <span style='font-size:48px;'>✅</span>
                     <h2 style='color:#28a745;margin:10px 0;'>PAGAMENTO APROVADO</h2>
                 </div>
-                <p><strong>Valor Pago:</strong> R$ {Amount}</p>
+                <p><strong>Valor Pago:</strong> R$ {finalPrice:N2}</p>
                 <p><strong>Data/Hora:</strong> {DateTime.UtcNow:dd/MM/yyyy HH:mm:ss}</p>
-                <p><strong>ID da Transação:</strong> {Guid.NewGuid()}</p>
+                <p><strong>ID da Transação:</strong> {pixCode}</p>
                 <p style='color:#28a745;text-align:center;font-weight:bold;'>✨ Processamento instantâneo via PIX ✨</p>
             </div>
 
@@ -519,10 +529,28 @@ namespace travel_agency_back.Third_party.Mail
                     <p><strong>Pacote:</strong> {NomePacotes}</p>
                     <p><strong>Origem:</strong> {Origem}</p>
                     <p><strong>Destino:</strong> {Destino}</p>
-                    <p><strong>Data de Início:</strong> {InicioViagem}</p>
-                    <p><strong>Data de Término:</strong> {FimViagem}</p>
+                    <p><strong>Data de Início:</strong> {InicioViagem:dd/MM/yyyy}</p>
+                    <p><strong>Data de Término:</strong> {FimViagem:dd/MM/yyyy}</p>
                     <p><strong>Viajante:</strong> {FirstName} {LastName}</p>
                     <p><strong>Documento:</strong> {CPFPassport}</p>
+                    <p><strong>Características do Pacote:</strong><br>{packageFeatures}</p>
+                </div>
+            </div>
+
+            <div style='margin:20px 0;'>
+                <h2 style='color:#2563eb;'>💡 Opcionais Selecionados</h2>
+                <div style='background-color:#f8f9fa;padding:10px;border-radius:5px;border-left:4px solid #2563eb;'>
+                    {optionalsHtml}
+                </div>
+            </div>
+
+            <div style='margin:20px 0;'>
+                <h2 style='color:#2563eb;'>💰 Cálculo do Valor</h2>
+                <div style='background-color:#f8f9fa;padding:10px;border-radius:5px;border-left:4px solid #2563eb;'>
+                    <p>Valor Base: R$ {basePrice:N2}</p>
+                    <p>Acréscimo Opcionais: R$ {extrasValue:N2}</p>
+                    <p>Desconto: -R$ {discount:N2}</p>
+                    <p><strong>Valor Final: R$ {finalPrice:N2}</strong></p>
                 </div>
             </div>
 
@@ -610,8 +638,6 @@ namespace travel_agency_back.Third_party.Mail
     </div>
 </body>
 </html>
-"";
-
 ";
         }
     }

@@ -85,7 +85,12 @@ namespace travel_agency_back.Controllers
                         Complement = b.Package.LodgingInfo.Complement
                     }
                 },
-                DiscountPercent = b.Package?.DiscountPercent
+                DiscountPercent = b.Package?.DiscountPercent,
+                // NOVO: opcionais escolhidos
+                HasTravelInsurance = b.HasTravelInsurance,
+                HasTourGuide = b.HasTourGuide,
+                HasTour = b.HasTour,
+                HasActivities = b.HasActivities
             }).ToList();
 
             return Task.FromResult<IActionResult>(Ok(response));

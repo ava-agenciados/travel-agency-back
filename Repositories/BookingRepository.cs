@@ -61,6 +61,7 @@ namespace travel_agency_back.Repositories
                 .Include(b => b.Payments)
                 .Include(b => b.Package)
                 .ThenInclude(p => p.LodgingInfo)
+                .Include(b => b.User) // Adiciona o include do usuário
                 .ToListAsync();
             return bookings;
         }

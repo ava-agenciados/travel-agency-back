@@ -61,16 +61,28 @@ namespace travel_agency_back.Services
             };
 
             // Cálculo do preço final com opcionais
-            decimal finalPrice = package.Price;
+            decimal basePrice = package.Price;
             int optionals = 0;
-            if (booking.HasTravelInsurance) optionals++;
-            if (booking.HasTourGuide) optionals++;
-            if (booking.HasTour) optionals++;
-            if (booking.HasActivities) optionals++;
-            finalPrice += finalPrice * 0.02m * optionals;
+            List<string> optionalsList = new();
+            if (booking.HasTravelInsurance) { optionals++; optionalsList.Add("Seguro Viagem"); }
+            if (booking.HasTourGuide) { optionals++; optionalsList.Add("Guia Turístico"); }
+            if (booking.HasTour) { optionals++; optionalsList.Add("Passeio Turístico"); }
+            if (booking.HasActivities) { optionals++; optionalsList.Add("Atividades Extras"); }
+            decimal extrasValue = basePrice * 0.02m * optionals;
+            decimal discount = 0;
+            if (package.DiscountPercent.HasValue && package.DiscountPercent.Value > 0)
+                discount = (basePrice + extrasValue) * ((decimal)package.DiscountPercent.Value / 100m);
+            decimal finalPrice = basePrice + extrasValue - discount;
             booking.FinalPrice = finalPrice;
             // Atualiza o valor em todos os pagamentos
             foreach (var pay in booking.Payments) pay.Amount = finalPrice;
+
+            // Monta string de características do pacote
+            string packageFeatures = package.Description;
+            if (package.LodgingInfo != null)
+            {
+                packageFeatures += $"\nAcomodações: {package.LodgingInfo.Beds} camas, {package.LodgingInfo.Baths} banheiros, Wi-Fi: {(package.LodgingInfo.WifiIncluded ? "Sim" : "Não")}, Piscina: {(package.LodgingInfo.SwimmingPool ? "Sim" : "Não")}, Café da manhã: {(package.LodgingInfo.Breakfast ? "Sim" : "Não")}";
+            }
 
             if (userInfo == null)
             {
@@ -99,7 +111,19 @@ namespace travel_agency_back.Services
                 case PaymentMethod.Pix:
                     booking.Status = "Aprovado";
                     booking.Payments.FirstOrDefault().Status = "Aprovado";
-                    await EmailService.SendPixPaymentConfirmation(userInfo, createNewBooking.PaymentMethods?.FirstOrDefault(), package, booking, _logger);
+                    await EmailService.SendPixPaymentConfirmation(
+                        userInfo,
+                        createNewBooking.PaymentMethods?.FirstOrDefault(),
+                        package,
+                        booking,
+                        _logger,
+                        basePrice,
+                        extrasValue,
+                        discount,
+                        finalPrice,
+                        optionalsList,
+                        packageFeatures
+                    );
                     break;
                 case PaymentMethod.Boleto:
                     booking.Status = "Pendente";
@@ -109,12 +133,17 @@ namespace travel_agency_back.Services
                         userInfo.FirstName,
                         userInfo.LastName,
                         userInfo.CPFPassport,
-                        package.Price,
+                        finalPrice,
                         package.Name,
                         package.Destination,
                         package.Origin,
                         booking.TravelDate,
-                        booking.TravelDate // ou outro campo de fim
+                        booking.TravelDate, // ou outro campo de fim
+                        basePrice,
+                        extrasValue,
+                        discount,
+                        optionalsList,
+                        packageFeatures
                     );
                     break;
                 case PaymentMethod.CreditCard:
@@ -125,7 +154,7 @@ namespace travel_agency_back.Services
                         payment.FirstName,
                         payment.LastName,
                         payment.CPFPassport,
-                        package.Price,
+                        finalPrice,
                         package.Name,
                         package.Destination,
                         package.Origin,
@@ -133,7 +162,13 @@ namespace travel_agency_back.Services
                         booking.TravelDate, // ou outro campo de fim
                         payment.Installments, // parcelas, ajuste conforme necessário
                         "Recusado", // status, ajuste conforme necessário
-                        payment.TransactionId.ToString()
+                        payment.TransactionId.ToString(),
+                        null,
+                        basePrice,
+                        extrasValue,
+                        discount,
+                        optionalsList,
+                        packageFeatures
                     );
                     break;
                 case PaymentMethod.DebitCard:
@@ -144,7 +179,7 @@ namespace travel_agency_back.Services
                         payment.FirstName,
                         payment.LastName,
                         payment.CPFPassport,
-                        package.Price,
+                        finalPrice,
                         package.Name,
                         package.Destination,
                         package.Origin,
@@ -152,7 +187,13 @@ namespace travel_agency_back.Services
                         booking.TravelDate, // ou outro campo de fim
                         1, // parcelas, ajuste conforme necessário
                         "Recusado", // status, ajuste conforme necessário
-                        payment.TransactionId.ToString()
+                        payment.TransactionId.ToString(),
+                        null,
+                        basePrice,
+                        extrasValue,
+                        discount,
+                        optionalsList,
+                        packageFeatures
                     );
                     break;
                 default:
@@ -214,7 +255,20 @@ namespace travel_agency_back.Services
                         Complement = b.Package.LodgingInfo.Complement
                     }
                 },
-                DiscountPercent = b.Package?.DiscountPercent
+                DiscountPercent = b.Package?.DiscountPercent,
+                HasTravelInsurance = b.HasTravelInsurance,
+                HasTourGuide = b.HasTourGuide,
+                HasTour = b.HasTour,
+                HasActivities = b.HasActivities,
+                // NOVO: informações do contratante
+                ContractingUser = b.User == null ? null : new UserSummaryDTO
+                {
+                    Id = b.User.Id,
+                    FirstName = b.User.FirstName,
+                    LastName = b.User.LastName,
+                    Email = b.User.Email,
+                    CPFPassport = b.User.CPFPassport
+                }
             }).ToList();
 
             return Task.FromResult<IActionResult>(new OkObjectResult(response));

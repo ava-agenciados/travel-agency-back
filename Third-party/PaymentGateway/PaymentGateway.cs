@@ -44,7 +44,24 @@ namespace travel_agency_back.Third_party.PaymentGateway
                 transactionId = $"BOL-{Guid.NewGuid().ToString("N")[..8].ToUpper()}";
 
                 // Envia email do boleto
-                EmailService.SendBoletoEmail(email, FirstName, LastName, CPFPassport, amount, nomePacote, Destino, Origem, InicioViagem, FimViagem);
+                // Update the call to SendBoletoEmail to include the missing parameters
+                EmailService.SendBoletoEmail(
+                    email,
+                    FirstName,
+                    LastName,
+                    CPFPassport,
+                    amount,
+                    nomePacote,
+                    Destino,
+                    Origem,
+                    InicioViagem,
+                    FimViagem,
+                    0, // basePrice
+                    0, // extrasValue
+                    0, // discount
+                    new List<string>(), // optionalsList
+                    string.Empty // packageFeatures
+                );
             }
 
             if (paymentMethod == PaymentMethod.Pix)
