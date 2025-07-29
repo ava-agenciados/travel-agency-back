@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using travel_agency_back.DTOs.Requests.Media;
 using travel_agency_back.Models;
 using travel_agency_back.Repositories.Interfaces;
 using travel_agency_back.Services.Interfaces;
+using travel_agency_back.Data;
 
 namespace travel_agency_back.Services
 {
@@ -10,14 +12,27 @@ namespace travel_agency_back.Services
     {
 
         private readonly IPackageRepository _packageRepository;
+        private readonly ApplicationDBContext _context;
 
-        public MediaService(IPackageRepository packageRepository)
+        public MediaService(IPackageRepository packageRepository, ApplicationDBContext context)
         {
             _packageRepository = packageRepository;
+            _context = context;
         }
-        public Task<IActionResult> DeleteMediaAsync(int mediaId)
+        public async Task<IActionResult> DeleteMediaAsync(int mediaId)
         {
-            throw new NotImplementedException();
+            var media = await _context.PackageMedia.FirstOrDefaultAsync(m => m.Id == mediaId);
+            if (media == null)
+                return new NotFoundObjectResult(new { message = "Mídia não encontrada." });
+
+            // Remove o arquivo físico se existir
+            var filePath = Path.Combine("wwwroot", media.ImageURL);
+            if (System.IO.File.Exists(filePath))
+                System.IO.File.Delete(filePath);
+
+            _context.PackageMedia.Remove(media);
+            await _context.SaveChangesAsync();
+            return new OkObjectResult(new { message = "Mídia deletada com sucesso!" });
         }
 
         public Task<IActionResult> GetAllMediaAsync(int packageId)

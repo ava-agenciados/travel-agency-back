@@ -94,8 +94,7 @@ namespace travel_agency_back.Repositories
                 .Include(p => p.Ratings).ThenInclude(r => r.User)
                 .Include(p => p.PackageMedia)
                 .Include(p => p.LodgingInfo) // Inclui LodgingInfo
-                .Where(p => p.IsAvailable)
-                .ToListAsync();
+                .ToListAsync(); // Removido o filtro .Where(p => p.IsAvailable)
             return packages;
         }
 
@@ -120,8 +119,7 @@ namespace travel_agency_back.Repositories
                 .Include(p => p.Ratings)
                 .Include(p => p.PackageMedia)
                 .Include(p => p.LodgingInfo) // Inclui LodgingInfo
-                .Where(p => p.IsAvailable)
-                .FirstOrDefaultAsync(p => p.Id == packageID);
+                .FirstOrDefaultAsync(p => p.Id == packageID); // Removido o filtro .Where(p => p.IsAvailable)
             if (package == null)
             {
                 return null;

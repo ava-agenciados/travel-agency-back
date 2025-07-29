@@ -8,6 +8,7 @@ using travel_agency_back.DTOs.Resposes;
 using travel_agency_back.Services.Interfaces;
 using travel_agency_back.Utils; // Adicionado para usar DashboardMetricsPdfService
 using travel_agency_back.Models;
+using travel_agency_back.DTOs.Responses.Dashboard;
 
 namespace travel_agency_back.Controllers
 {
@@ -164,11 +165,11 @@ namespace travel_agency_back.Controllers
             return Ok(new GenericResponseDTO(200, "Pacote deletado com sucesso!", true));
         }
 
-        [HttpDelete("packages/{packageId}/media/{mediaName}")]
+        [HttpDelete("packages/media/{mediaId}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteMediaFromPackage(int packageId, string mediaName)
+        public async Task<IActionResult> DeleteMedia(int mediaId)
         {
-            var result = await _mediaService.DeleteMediaFromPackageAsync(packageId, mediaName);
+            var result = await _mediaService.DeleteMediaAsync(mediaId);
             return result;
         }
 
@@ -271,6 +272,22 @@ namespace travel_agency_back.Controllers
             if (result is NotFoundObjectResult)
                 return NotFound(new GenericResponseDTO(404, "Reserva não encontrada", false));
             return Ok(new GenericResponseDTO(200, "Reserva deletada com sucesso!", true));
+        }
+
+        /// <summary>
+        /// Retorna todos os usuários do sistema (admin/atendente).
+        /// </summary>
+        /// <remarks>Endpoint protegido, apenas administradores e atendentes podem visualizar todos os usuários.</remarks>
+        [SwaggerOperation(
+            Summary = "Retorna todos os usuários do sistema",
+            Description = "Endpoint protegido, apenas administradores e atendentes podem visualizar todos os usuários."
+        )]
+        [HttpGet("users")]
+        [Authorize(Roles = "Admin, Atendente")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _adminService.GetAllUsersAsync();
+            return Ok(users);
         }
     }
 }

@@ -23,15 +23,16 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.SqlServer.Server" Version="1.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="QuestPDF" Version="2025.7.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DTOs\Resposes\" />
     <Folder Include="Migrations\" />
     <Folder Include="wwwroot\uploads\" />
+    <Folder Include="wwwroot\uploads\1\" />
   </ItemGroup>
 
 </Project>

@@ -423,5 +423,18 @@ namespace travel_agency_back.Services
             await _bookingRepository.DeleteUserBookingAsync(booking.UserId, bookingId);
             return new OkObjectResult(new { Message = "Reserva deletada com sucesso." });
         }
+
+        public async Task<IEnumerable<UserResponseDTO>> GetAllUsersAsync()
+        {
+            var users = _userManager.Users.ToList();
+            return users.Select(u => new UserResponseDTO
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Role = u.Role
+            });
+        }
     }
 }

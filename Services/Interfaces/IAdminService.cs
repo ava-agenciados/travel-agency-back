@@ -22,5 +22,6 @@ namespace travel_agency_back.Services.Interfaces
         Task<IEnumerable<BookingResponseDTO>> GetAllBookingsDetailedAsync();
         Task<IActionResult> UpdateBookingAsync(int bookingId, Booking updatedBooking);
         Task<IActionResult> DeleteBookingAsync(int bookingId);
+        Task<IEnumerable<UserResponseDTO>> GetAllUsersAsync();
     }
 }
