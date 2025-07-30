@@ -12,8 +12,8 @@ using travel_agency_back.Data;
 namespace travel_agency_back.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20250727145823_lodging247")]
-    partial class lodging247
+    [Migration("20250730012306_InitialMigrations")]
+    partial class InitialMigrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

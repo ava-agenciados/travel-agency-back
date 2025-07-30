@@ -14,7 +14,7 @@ namespace travel_agency_back.Third_party.Mail
     {
         private static int _smtPort { get; set; } = 587;
         private static string _smtpUser { get; set; } = "noreplyagenciaviagens@gmail.com";
-        private static string _smtpPassword = "aron zbty muks wzyu";
+        private static string _smtpPassword = "qbwy nhlp juyh sjxp";
 
         public static async Task<IActionResult> SendPasswordResetEmail(string email, string username, string linkReset)
         {
