@@ -131,7 +131,7 @@ namespace travel_agency_back.Repositories
         {
             var query = _context.Packages
                 .Include(p => p.Bookings)
-                .Include(p => p.Ratings)
+                .Include(p => p.Ratings).ThenInclude(r => r.User) // Inclui o usuário nas avaliações
                 .Include(p => p.PackageMedia)
                 .Include(p => p.LodgingInfo) // Inclui LodgingInfo
                 .Where(p => p.IsAvailable)

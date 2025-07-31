@@ -147,11 +147,14 @@ namespace travel_agency_back.Services
                 Origin = p.Origin,
                 Destination = p.Destination,
                 IsActive = p.IsAvailable,
-                Ratings = p.Ratings?.Select(r => new PackageRatingResponseDTO
+                Ratings = p.Ratings?.Where(r => r.IsAvailable).Select(r => new PackageRatingResponseDTO
                 {
                     Id = r.Id,
                     Rating = r.Stars,
-                    Comment = r.Comment
+                    Comment = r.Comment,
+                    CreatedAt = r.CreatedAt,
+                    UserName = r.User != null ? ($"{r.User.FirstName} {r.User.LastName}") : string.Empty,
+                    UserEmail = r.User != null ? r.User.Email : string.Empty
                 }).ToList(),
                 PackageMedia = p.PackageMedia?.Select(pm => new PackageMediaResponseDTO
                 {
@@ -159,8 +162,8 @@ namespace travel_agency_back.Services
                     MediaType = pm.MediaType,
                     MediaUrl = pm.ImageURL
                 }).ToList(),
-                DiscountPercent = p.DiscountPercent,
-                LodgingInfo = p.LodgingInfo == null ? null : new DTOs.Packages.LodgingInfoDTO
+                DiscountPercent = p.DiscountPercent ?? 0, // valor padrão 0 se nulo
+                LodgingInfo = p.LodgingInfo == null ? new DTOs.Packages.LodgingInfoDTO() : new DTOs.Packages.LodgingInfoDTO
                 {
                     Baths = p.LodgingInfo.Baths,
                     Beds = p.LodgingInfo.Beds,

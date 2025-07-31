@@ -108,7 +108,6 @@ namespace travel_agency_back.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> PackageSearch([FromQuery] PackageSearchRequestDTO packageSearchDTO)
         {
-
             var packages = await _packageService.GetPackagesByFilterAsync(
                packageSearchDTO.Origin,
                packageSearchDTO.Destination,
@@ -119,31 +118,8 @@ namespace travel_agency_back.Controllers
             {
                 return BadRequest(new GenericResponseDTO(404, "Nenhum pacote encontrado", false));
             }
-            var response = packages.Select(p => new PackageResponseDTO
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                Price = p.Price,
-                DepartureDate = p.DepartureDate,
-                ReturnDate = p.ReturnDate,
-                Origin = p.Origin,
-                Destination = p.Destination,
-                IsActive = p.IsActive,
-                Ratings = p.Ratings?.Select(r => new PackageRatingResponseDTO
-                {
-                    Id = r.Id,
-                    Rating = r.Rating,
-                    Comment = r.Comment
-                }).ToList(),
-                PackageMedia = p.PackageMedia?.Select(pm => new PackageMediaResponseDTO
-                {
-                    Id = pm.Id,
-                    MediaType = pm.MediaType,
-                    MediaUrl = pm.MediaUrl
-                }).ToList()
-            });
-            return Ok(response);
+            // Retorna diretamente o resultado do service, que já faz o mapeamento correto
+            return Ok(packages);
         }
 
         [HttpPost]
