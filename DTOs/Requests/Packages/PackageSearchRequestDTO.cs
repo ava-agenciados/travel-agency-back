@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;                 // (Não está sendo usado diretamente aqui, pode ser removido)
+﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace travel_agency_back.DTOs.Requests.Packages
 {
@@ -26,8 +28,12 @@ namespace travel_agency_back.DTOs.Requests.Packages
         /// Data de partida desejada para o pacote.
         /// É opcional. Se fornecida, pode ser usada para filtrar resultados por data específica.
         /// </summary>
+        [JsonConverter(typeof(travel_agency_back.Utils.DateTimeJsonConverter))]
+        [SwaggerSchema(Format = "date", Description = "Formato: dd/MM/yyyy")]
         public DateTime? DepartureDate { get; set; }
 
+        [JsonConverter(typeof(travel_agency_back.Utils.DateTimeJsonConverter))]
+        [SwaggerSchema(Format = "date", Description = "Formato: dd/MM/yyyy")]
         public DateTime? ReturnDate { get; set; }
     }
 }

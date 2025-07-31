@@ -84,7 +84,7 @@ namespace travel_agency_back.Data
                 // Brasileiros
                 new User { UserName = "ana.silva@gmail.com", Email = "ana.silva@gmail.com", FirstName = "Ana", LastName = "Silva", PhoneNumber = "11999990001", CPFPassport = "11111111112", Role = "Cliente" },
                 new User { UserName = "carlos.souza@outlook.com", Email = "carlos.souza@outlook.com", FirstName = "Carlos", LastName = "Souza", PhoneNumber = "21999990002", CPFPassport = "11111111113", Role = "Cliente" },
-                new User { UserName = "mariana.lima@yahoo.com", Email = "mariana.lima@yahoo.com", FirstName = "Mariana", LastName = "Lima", PhoneNumber = "31999990003", CPFPassport = "11111111114", Role = "Cliente" },
+                new User { UserName = "mariana.limaYahoo.com", Email = "mariana.limaYahoo.com", FirstName = "Mariana", LastName = "Lima", PhoneNumber = "31999990003", CPFPassport = "11111111114", Role = "Cliente" },
                 new User { UserName = "joao.pereira@gmail.com", Email = "joao.pereira@gmail.com", FirstName = "João", LastName = "Pereira", PhoneNumber = "41999990004", CPFPassport = "11111111115", Role = "Cliente" },
                 new User { UserName = "fernanda.alves@outlook.com", Email = "fernanda.alves@outlook.com", FirstName = "Fernanda", LastName = "Alves", PhoneNumber = "51999990005", CPFPassport = "11111111116", Role = "Cliente" },
                 new User { UserName = "lucas.gomes@yahoo.com", Email = "lucas.gomes@yahoo.com", FirstName = "Lucas", LastName = "Gomes", PhoneNumber = "61999990006", CPFPassport = "11111111117", Role = "Cliente" },
@@ -113,76 +113,301 @@ namespace travel_agency_back.Data
             // Adiciona pacotes de exemplo se não existirem
             if (!await dbContext.Packages.AnyAsync())
             {
-                // Cria LodgingInfo como entidades separadas
+                // Cria LodgingInfo premium e realista para cada destino de pacote
                 var lodgingList = new List<LodgingInfo>
                 {
-                    new LodgingInfo { Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Av. Atlântica", Number = "1702", Neighborhood = "Copacabana", City = "Rio de Janeiro", State = "RJ", Country = "Brasil", ZipCode = "22021-001", Complement = "Apto 101" },
-                    new LodgingInfo { Baths = 1, Beds = 3, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Av. Sete de Setembro", Number = "1000", Neighborhood = "Centro", City = "Salvador", State = "BA", Country = "Brasil", ZipCode = "40060-001", Complement = null },
-                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = false, RestaurantOnSite = false, PetAllowed = true, AirConditioned = true, Breakfast = false, Street = "Rua das Gaivotas", Number = "500", Neighborhood = "Ingleses", City = "Florianópolis", State = "SC", Country = "Brasil", ZipCode = "88058-500", Complement = null },
-                    new LodgingInfo { Baths = 1, Beds = 1, WifiIncluded = false, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = false, Breakfast = true, Street = "Estrada do Turismo", Number = "S/N", Neighborhood = "Tarumã", City = "Manaus", State = "AM", Country = "Brasil", ZipCode = "69041-010", Complement = null },
-                    new LodgingInfo { Baths = 1, Beds = 3, WifiIncluded = false, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = true, AirConditioned = false, Breakfast = true, Street = "Estrada do Pantanal", Number = "S/N", Neighborhood = "Zona Rural", City = "Corumbá", State = "MS", Country = "Brasil", ZipCode = "79304-000", Complement = null },
-                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Av. das Cataratas", Number = "6798", Neighborhood = "Vila Yolanda", City = "Foz do Iguaçu", State = "PR", Country = "Brasil", ZipCode = "85853-000", Complement = null },
-                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = false, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = false, PetAllowed = true, AirConditioned = false, Breakfast = false, Street = "Rua do Vale", Number = "300", Neighborhood = "Lençóis", City = "Lençóis", State = "BA", Country = "Brasil", ZipCode = "46960-000", Complement = null },
-                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = true, AirConditioned = true, Breakfast = true, Street = "Rua Pilád Rebuá", Number = "1835", Neighborhood = "Centro", City = "Bonito", State = "MS", Country = "Brasil", ZipCode = "79290-000", Complement = null },
-                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Rua do Amparo", Number = "100", Neighborhood = "Amparo", City = "Olinda", State = "PE", Country = "Brasil", ZipCode = "53025-080", Complement = null },
-                    new LodgingInfo { Baths = 1, Beds = 1, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Rue de Rivoli", Number = "45", Neighborhood = "1er Arrondissement", City = "Paris", State = "Île-de-France", Country = "França", ZipCode = "75001", Complement = "Quarto 12" },
-                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "5th Avenue", Number = "700", Neighborhood = "Manhattan", City = "New York", State = "NY", Country = "EUA", ZipCode = "10019", Complement = null },
-                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Avenida da Liberdade", Number = "250", Neighborhood = "Avenida", City = "Lisboa", State = "Lisboa", Country = "Portugal", ZipCode = "1250-147", Complement = null },
-                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Avenida 9 de Julio", Number = "1000", Neighborhood = "Centro", City = "Buenos Aires", State = "CABA", Country = "Argentina", ZipCode = "1043", Complement = null },
-                    new LodgingInfo { Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = false, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true, Street = "Avenida Libertador", Number = "1234", Neighborhood = "Providencia", City = "Santiago", State = "Región Metropolitana", Country = "Chile", ZipCode = "7500000", Complement = null }
+                    // NACIONAIS
+                    new LodgingInfo { // Cataratas do Iguaçu (Foz do Iguaçu)
+                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                        Street = "Av. das Cataratas", Number = "2420", Neighborhood = "Vila Yolanda", City = "Foz do Iguaçu", State = "PR", Country = "Brasil", ZipCode = "85853-000", Complement = "Hotel 5 estrelas, vista para as Cataratas"
+                    },
+                    new LodgingInfo { // Maragogi
+                        Baths = 2, Beds = 3, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = true, AirConditioned = true, Breakfast = true,
+                        Street = "Rod. AL-101 Norte", Number = "km 124", Neighborhood = "Praia de Antunes", City = "Maragogi", State = "AL", Country = "Brasil", ZipCode = "57955-000", Complement = "Resort beira-mar, bangalôs exclusivos"
+                    },
+                    new LodgingInfo { // Olinda
+                        Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                        Street = "Rua do Amparo", Number = "100", Neighborhood = "Amparo", City = "Olinda", State = "PE", Country = "Brasil", ZipCode = "53025-080", Complement = "Pousada histórica no centro colonial"
+                    },
+                    new LodgingInfo { // Recife
+                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                        Street = "Av. Boa Viagem", Number = "4070", Neighborhood = "Boa Viagem", City = "Recife", State = "PE", Country = "Brasil", ZipCode = "51021-000", Complement = "Hotel de luxo à beira-mar"
+                    },
+                    new LodgingInfo { // Rio de Janeiro
+                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                        Street = "Av. Atlântica", Number = "3264", Neighborhood = "Copacabana", City = "Rio de Janeiro", State = "RJ", Country = "Brasil", ZipCode = "22070-001", Complement = "Suíte com vista para o mar, Copacabana Palace"
+                    },
+                    new LodgingInfo { // Salvador
+                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = true, AirConditioned = true, Breakfast = true,
+                        Street = "Rua Fonte do Boi", Number = "215", Neighborhood = "Rio Vermelho", City = "Salvador", State = "BA", Country = "Brasil", ZipCode = "41940-360", Complement = "Hotel boutique no bairro boêmio"
+                    },
+                    // INTERNACIONAIS
+                    new LodgingInfo { // Londres
+                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                        Street = "Strand", Number = "336", Neighborhood = "Westminster", City = "London", State = "England", Country = "United Kingdom", ZipCode = "WC2R 1HA", Complement = "The Savoy Hotel, luxo clássico londrino"
+                    },
+                    new LodgingInfo { // Madri
+                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                        Street = "Calle de Alcalá", Number = "66", Neighborhood = "Salamanca", City = "Madrid", State = "Madrid", Country = "Espanha", ZipCode = "28009", Complement = "Hotel 5 estrelas próximo ao Parque do Retiro"
+                    },
+                    new LodgingInfo { // Moscow
+                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                        Street = "Ulitsa Tverskaya", Number = "3", Neighborhood = "Tverskoy", City = "Moscow", State = "Moscow", Country = "Rússia", ZipCode = "125009", Complement = "Hotel de luxo próximo à Praça Vermelha"
+                    },
+                    new LodgingInfo { // New York
+                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                        Street = "5th Avenue", Number = "700", Neighborhood = "Manhattan", City = "New York", State = "NY", Country = "USA", ZipCode = "10019", Complement = "The Plaza Hotel, Central Park"
+                    },
+                    new LodgingInfo { // Paris
+                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                        Street = "Avenue des Champs-Élysées", Number = "31", Neighborhood = "8th arrondissement", City = "Paris", State = "Île-de-France", Country = "França", ZipCode = "75008", Complement = "Hotel Barrière Le Fouquet's Paris"
+                    },
+                    new LodgingInfo { // Tokyo
+                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                        Street = "Nishi Shinjuku", Number = "2-2-1", Neighborhood = "Shinjuku", City = "Tokyo", State = "Tokyo", Country = "Japão", ZipCode = "160-0023", Complement = "Park Hyatt Tokyo, vista para o Monte Fuji"
+                    }
                 };
-                dbContext.LodgingInfos.AddRange(lodgingList);
+                await dbContext.LodgingInfos.AddRangeAsync(lodgingList);
                 await dbContext.SaveChangesAsync();
 
-                var pacotes = new List<Packages>();
-                for (int i = 0; i < lodgingList.Count; i++)
+                var lodgingInfos = await dbContext.LodgingInfos.ToListAsync();
+
+                // Mapeamento destino -> LodgingInfo
+                int GetLodgingId(string destino)
                 {
-                    pacotes.Add(new Packages
+                    // Use FirstOrDefault and fallback to the first lodgingInfo if not found
+                    return destino switch
                     {
-                        Name = $"Pacote {i + 1}",
-                        Description = $"Descrição do pacote {i + 1}",
-                        Price = 1000 + i * 100,
-                        ImageUrl = $"https://example.com/image{i + 1}.jpg",
-                        ActiveFrom = DateTime.Now,
-                        ActiveUntil = DateTime.Now.AddMonths(2),
-                        BeginDate = DateTime.Now.AddDays(10 + i),
-                        EndDate = DateTime.Now.AddDays(17 + i),
-                        Origin = "Origem",
-                        Destination = "Destino",
-                        Quantity = 10 + i,
-                        CreatedAt = DateTime.Now,
-                        IsAvailable = true,
-                        DiscountPercent = 5 + i,
-                        LodgingInfoId = lodgingList[i].Id
-                    });
+                        "Cataratas do Iguaçu" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Foz do Iguaçu"))?.Id ?? lodgingInfos.First().Id,
+                        "Maragogi" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Maragogi"))?.Id ?? lodgingInfos.First().Id,
+                        "Olinda" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Olinda"))?.Id ?? lodgingInfos.First().Id,
+                        "Recife" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Recife"))?.Id ?? lodgingInfos.First().Id,
+                        "Rio de Janeiro" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Rio de Janeiro"))?.Id ?? lodgingInfos.First().Id,
+                        "Salvador" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Salvador"))?.Id ?? lodgingInfos.First().Id,
+                        "Londres" => lodgingInfos.FirstOrDefault(l => l.City.Contains("London"))?.Id ?? lodgingInfos.First().Id,
+                        "Madri" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Madrid"))?.Id ?? lodgingInfos.First().Id,
+                        "Moscow" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Moscow"))?.Id ?? lodgingInfos.First().Id,
+                        "New York" => lodgingInfos.FirstOrDefault(l => l.City.Contains("New York"))?.Id ?? lodgingInfos.First().Id,
+                        "Paris" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Paris"))?.Id ?? lodgingInfos.First().Id,
+                        "Tokyo" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Tokyo"))?.Id ?? lodgingInfos.First().Id,
+                        _ => lodgingInfos.First().Id
+                    };
                 }
+
+                var pacotes = new List<Packages>
+                {
+                    new Packages {
+                        Name = "Aventura nas Cataratas do Iguaçu",
+                        Description = "Explore as maravilhas das Cataratas do Iguaçu, com passeio pelo Parque Nacional, visita à fronteira tríplice e experiências únicas na natureza.",
+                        Price = 2500,
+                        ImageUrl = "uploads/1.jpg",
+                        ActiveFrom = DateTime.ParseExact("01/08/2025", "dd/MM/yyyy", null),
+                        ActiveUntil = DateTime.ParseExact("30/09/2025", "dd/MM/yyyy", null),
+                        BeginDate = DateTime.ParseExact("10/08/2025", "dd/MM/yyyy", null),
+                        EndDate = DateTime.ParseExact("17/08/2025", "dd/MM/yyyy", null),
+                        Origin = "São Paulo",
+                        Destination = "Cataratas do Iguaçu",
+                        Quantity = 20,
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null),
+                        IsAvailable = true,
+                        DiscountPercent = 15,
+                        LodgingInfoId = GetLodgingId("Cataratas do Iguaçu")
+                    },
+                    new Packages {
+                        Name = "Encantos de Maragogi",
+                        Description = "Aproveite as piscinas naturais de Maragogi, o 'Caribe brasileiro', com águas cristalinas, passeios de jangada e culinária local.",
+                        Price = 3200,
+                        ImageUrl = "uploads/2.jpg",
+                        ActiveFrom = DateTime.ParseExact("01/08/2025", "dd/MM/yyyy", null),
+                        ActiveUntil = DateTime.ParseExact("30/09/2025", "dd/MM/yyyy", null),
+                        BeginDate = DateTime.ParseExact("11/08/2025", "dd/MM/yyyy", null),
+                        EndDate = DateTime.ParseExact("18/08/2025", "dd/MM/yyyy", null),
+                        Origin = "Recife",
+                        Destination = "Maragogi",
+                        Quantity = 15,
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null),
+                        IsAvailable = true,
+                        DiscountPercent = 0,
+                        LodgingInfoId = GetLodgingId("Maragogi")
+                    },
+                    new Packages {
+                        Name = "Carnaval Histórico em Olinda",
+                        Description = "Descubra o charme de Olinda, patrimônio mundial, com ladeiras coloridas, igrejas históricas e o melhor carnaval do Brasil.",
+                        Price = 2000,
+                        ImageUrl = "uploads/3.jpg",
+                        ActiveFrom = DateTime.ParseExact("01/08/2025", "dd/MM/yyyy", null),
+                        ActiveUntil = DateTime.ParseExact("30/09/2025", "dd/MM/yyyy", null),
+                        BeginDate = DateTime.ParseExact("12/08/2025", "dd/MM/yyyy", null),
+                        EndDate = DateTime.ParseExact("19/08/2025", "dd/MM/yyyy", null),
+                        Origin = "Recife",
+                        Destination = "Olinda",
+                        Quantity = 10,
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null),
+                        IsAvailable = true,
+                        DiscountPercent = 5,
+                        LodgingInfoId = GetLodgingId("Olinda")
+                    },
+                    new Packages {
+                        Name = "Recife: Cultura e Praias",
+                        Description = "Conheça Recife, a 'Veneza brasileira', com passeios de barco, cultura, história e gastronomia local.",
+                        Price = 2300,
+                        ImageUrl = "uploads/4.jpg",
+                        ActiveFrom = DateTime.ParseExact("01/08/2025", "dd/MM/yyyy", null),
+                        ActiveUntil = DateTime.ParseExact("30/09/2025", "dd/MM/yyyy", null),
+                        BeginDate = DateTime.ParseExact("13/08/2025", "dd/MM/yyyy", null),
+                        EndDate = DateTime.ParseExact("20/08/2025", "dd/MM/yyyy", null),
+                        Origin = "Salvador",
+                        Destination = "Recife",
+                        Quantity = 12,
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null),
+                        IsAvailable = true,
+                        DiscountPercent = 10,
+                        LodgingInfoId = GetLodgingId("Recife")
+                    },
+                    new Packages {
+                        Name = "Rio de Janeiro: Maravilhas Cariocas",
+                        Description = "Viva o Rio de Janeiro, com visita ao Cristo Redentor, Pão de Açúcar, praias famosas e vida noturna agitada.",
+                        Price = 3500,
+                        ImageUrl = "uploads/5.jpg",
+                        ActiveFrom = DateTime.ParseExact("01/08/2025", "dd/MM/yyyy", null),
+                        ActiveUntil = DateTime.ParseExact("30/09/2025", "dd/MM/yyyy", null),
+                        BeginDate = DateTime.ParseExact("14/08/2025", "dd/MM/yyyy", null),
+                        EndDate = DateTime.ParseExact("21/08/2025", "dd/MM/yyyy", null),
+                        Origin = "São Paulo",
+                        Destination = "Rio de Janeiro",
+                        Quantity = 25,
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null),
+                        IsAvailable = true,
+                        DiscountPercent = 0,
+                        LodgingInfoId = GetLodgingId("Rio de Janeiro")
+                    },
+                    new Packages {
+                        Name = "Salvador: Ritmos e Sabores",
+                        Description = "Mergulhe na cultura baiana em Salvador, com Pelourinho, praias, festas e culinária típica.",
+                        Price = 2800,
+                        ImageUrl = "uploads/6.jpg",
+                        ActiveFrom = DateTime.ParseExact("01/08/2025", "dd/MM/yyyy", null),
+                        ActiveUntil = DateTime.ParseExact("30/09/2025", "dd/MM/yyyy", null),
+                        BeginDate = DateTime.ParseExact("15/08/2025", "dd/MM/yyyy", null),
+                        EndDate = DateTime.ParseExact("22/08/2025", "dd/MM/yyyy", null),
+                        Origin = "Recife",
+                        Destination = "Salvador",
+                        Quantity = 18,
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null),
+                        IsAvailable = true,
+                        DiscountPercent = 0,
+                        LodgingInfoId = GetLodgingId("Salvador")
+                    },
+                    // INTERNACIONAIS
+                    new Packages {
+                        Name = "Londres Real e Moderna",
+                        Description = "Descubra Londres, com passeios pela Tower Bridge, Big Ben, museus, pubs tradicionais e cultura vibrante.",
+                        Price = 12000,
+                        ImageUrl = "uploads/7.jpg",
+                        ActiveFrom = DateTime.ParseExact("01/08/2025", "dd/MM/yyyy", null),
+                        ActiveUntil = DateTime.ParseExact("30/09/2025", "dd/MM/yyyy", null),
+                        BeginDate = DateTime.ParseExact("16/08/2025", "dd/MM/yyyy", null),
+                        EndDate = DateTime.ParseExact("23/08/2025", "dd/MM/yyyy", null),
+                        Origin = "São Paulo",
+                        Destination = "Londres",
+                        Quantity = 8,
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null),
+                        IsAvailable = true,
+                        DiscountPercent = 0,
+                        LodgingInfoId = GetLodgingId("Londres")
+                    },
+                    new Packages {
+                        Name = "Madri: Arte e Gastronomia",
+                        Description = "Explore Madri, capital espanhola, com arte, cultura, gastronomia e vida noturna animada.",
+                        Price = 10500,
+                        ImageUrl = "uploads/8.jpg",
+                        ActiveFrom = DateTime.ParseExact("01/08/2025", "dd/MM/yyyy", null),
+                        ActiveUntil = DateTime.ParseExact("30/09/2025", "dd/MM/yyyy", null),
+                        BeginDate = DateTime.ParseExact("17/08/2025", "dd/MM/yyyy", null),
+                        EndDate = DateTime.ParseExact("24/08/2025", "dd/MM/yyyy", null),
+                        Origin = "São Paulo",
+                        Destination = "Madri",
+                        Quantity = 10,
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null),
+                        IsAvailable = true,
+                        DiscountPercent = 5,
+                        LodgingInfoId = GetLodgingId("Madri")
+                    },
+                    new Packages {
+                        Name = "Moscow Imperial",
+                        Description = "Conheça Moscow, com a Praça Vermelha, Kremlin, cultura russa e experiências únicas no inverno europeu.",
+                        Price = 13000,
+                        ImageUrl = "uploads/9.jpg",
+                        ActiveFrom = DateTime.ParseExact("01/08/2025", "dd/MM/yyyy", null),
+                        ActiveUntil = DateTime.ParseExact("30/09/2025", "dd/MM/yyyy", null),
+                        BeginDate = DateTime.ParseExact("18/08/2025", "dd/MM/yyyy", null),
+                        EndDate = DateTime.ParseExact("25/08/2025", "dd/MM/yyyy", null),
+                        Origin = "São Paulo",
+                        Destination = "Moscow",
+                        Quantity = 6,
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null),
+                        IsAvailable = true,
+                        DiscountPercent = 0,
+                        LodgingInfoId = GetLodgingId("Moscow")
+                    },
+                    new Packages {
+                        Name = "New York: Luzes e Broadway",
+                        Description = "Viva a experiência de Nova York, com Times Square, Central Park, Broadway e compras inesquecíveis.",
+                        Price = 15000,
+                        ImageUrl = "uploads/10.jpg",
+                        ActiveFrom = DateTime.ParseExact("01/08/2025", "dd/MM/yyyy", null),
+                        ActiveUntil = DateTime.ParseExact("30/09/2025", "dd/MM/yyyy", null),
+                        BeginDate = DateTime.ParseExact("19/08/2025", "dd/MM/yyyy", null),
+                        EndDate = DateTime.ParseExact("26/08/2025", "dd/MM/yyyy", null),
+                        Origin = "São Paulo",
+                        Destination = "New York",
+                        Quantity = 14,
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null),
+                        IsAvailable = true,
+                        DiscountPercent = 20,
+                        LodgingInfoId = GetLodgingId("New York")
+                    },
+                    new Packages {
+                        Name = "Paris Romântica",
+                        Description = "Encante-se com Paris, Torre Eiffel, Louvre, gastronomia francesa e passeios pelo Sena.",
+                        Price = 14000,
+                        ImageUrl = "uploads/11.jpg",
+                        ActiveFrom = DateTime.ParseExact("01/08/2025", "dd/MM/yyyy", null),
+                        ActiveUntil = DateTime.ParseExact("30/09/2025", "dd/MM/yyyy", null),
+                        BeginDate = DateTime.ParseExact("20/08/2025", "dd/MM/yyyy", null),
+                        EndDate = DateTime.ParseExact("27/08/2025", "dd/MM/yyyy", null),
+                        Origin = "São Paulo",
+                        Destination = "Paris",
+                        Quantity = 12,
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null),
+                        IsAvailable = true,
+                        DiscountPercent = 15,
+                        LodgingInfoId = GetLodgingId("Paris")
+                    },
+                    new Packages {
+                        Name = "Tokyo: Futuro e Tradição",
+                        Description = "Descubra Tokyo, tecnologia, cultura pop, templos milenares e culinária oriental.",
+                        Price = 16000,
+                        ImageUrl = "uploads/12.jpg",
+                        ActiveFrom = DateTime.ParseExact("01/08/2025", "dd/MM/yyyy", null),
+                        ActiveUntil = DateTime.ParseExact("30/09/2025", "dd/MM/yyyy", null),
+                        BeginDate = DateTime.ParseExact("21/08/2025", "dd/MM/yyyy", null),
+                        EndDate = DateTime.ParseExact("28/08/2025", "dd/MM/yyyy", null),
+                        Origin = "São Paulo",
+                        Destination = "Tokyo",
+                        Quantity = 7,
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null),
+                        IsAvailable = true,
+                        DiscountPercent = 0,
+                        LodgingInfoId = GetLodgingId("Tokyo")
+                    }
+                };
                 dbContext.Packages.AddRange(pacotes);
                 await dbContext.SaveChangesAsync();
             }
 
             // Adiciona uma imagem em PackageMedia para cada pacote usando o ImageUrl do pacote
-            var pacotesSalvos = await dbContext.Packages.ToListAsync();
-            var packageMediaList = new List<PackageMedia>();
-            foreach (var pacote in pacotesSalvos)
-            {
-                // Verifica se já existe uma mídia para esse pacote com o mesmo link
-                bool exists = await dbContext.PackageMedia.AnyAsync(pm => pm.PackageId == pacote.Id && pm.ImageURL == pacote.ImageUrl);
-                if (!exists)
-                {
-                    packageMediaList.Add(new PackageMedia
-                    {
-                        PackageId = pacote.Id,
-                        ImageURL = pacote.ImageUrl,
-                        MediaType = 1, // 1 para imagem
-                        CreatedAt = DateTime.Now
-                    });
-                }
-            }
-            if (packageMediaList.Count > 0)
-            {
-                dbContext.PackageMedia.AddRange(packageMediaList);
-                await dbContext.SaveChangesAsync();
-            }
+            // Removido conforme solicitado: não adicionar nenhum PackageMedia para os pacotes
 
             // Adiciona Ratings (avaliações) para os pacotes com base nos clientes
             var clientesSalvos = await dbContext.Users.Where(u => u.Role == "Cliente").ToListAsync();
@@ -228,7 +453,7 @@ namespace travel_agency_back.Data
                         Stars = nota,
                         Comment = comentarios[comentarioIndex % comentarios.Count],
                         IsAvailable = true,
-                        CreatedAt = DateTime.Now
+                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null)
                     });
                     comentarioIndex++;
                 }

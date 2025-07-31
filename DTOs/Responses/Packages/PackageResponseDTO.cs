@@ -1,4 +1,8 @@
-﻿namespace travel_agency_back.DTOs.Resposes.Packages
+﻿using System;
+using System.Text.Json.Serialization;
+using Swashbuckle.AspNetCore.Annotations;
+
+namespace travel_agency_back.DTOs.Resposes.Packages
 {
     public class PackageResponseDTO
     {
@@ -21,10 +25,14 @@
         /// <summary>
         /// Data de partida do pacote.
         /// </summary>
+        [JsonConverter(typeof(travel_agency_back.Utils.DateTimeJsonConverter))]
+        [SwaggerSchema(Format = "date", Description = "Formato: dd/MM/yyyy")]
         public DateTime? DepartureDate { get; set; }
         /// <summary>
         /// Data de retorno do pacote.
         /// </summary>
+        [JsonConverter(typeof(travel_agency_back.Utils.DateTimeJsonConverter))]
+        [SwaggerSchema(Format = "date", Description = "Formato: dd/MM/yyyy")]
         public DateTime? ReturnDate { get; set; }
 
         public string? Origin { get; set; }

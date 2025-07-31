@@ -17,7 +17,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 // Adiciona os controladores MVC à aplicação, permitindo o uso de controllers e rotas de API.
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new travel_agency_back.Utils.DateTimeJsonConverter("dd/MM/yyyy"));
+});
 
 // Adiciona suporte à documentação automática de endpoints (Swagger/OpenAPI) e configura autenticação JWT no Swagger
 builder.Services.AddEndpointsApiExplorer();
