@@ -407,7 +407,27 @@ namespace travel_agency_back.Data
             }
 
             // Adiciona uma imagem em PackageMedia para cada pacote usando o ImageUrl do pacote
-            // Removido conforme solicitado: não adicionar nenhum PackageMedia para os pacotes
+            var pacotesSalvos = await dbContext.Packages.OrderBy(p => p.Id).ToListAsync();
+            var packageMediaList = new List<PackageMedia>();
+            int mediaType = 1; // 1 para imagem
+            DateTime createdAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null);
+            for (int i = 0; i < pacotesSalvos.Count; i++)
+            {
+                var pacote = pacotesSalvos[i];
+                // Adiciona a imagem correspondente do campo ImageUrl
+                packageMediaList.Add(new PackageMedia
+                {
+                    PackageId = pacote.Id,
+                    ImageURL = pacote.ImageUrl,
+                    MediaType = mediaType,
+                    CreatedAt = createdAt
+                });
+            }
+            if (packageMediaList.Count > 0)
+            {
+                dbContext.PackageMedia.AddRange(packageMediaList);
+                await dbContext.SaveChangesAsync();
+            }
 
             // Adiciona Ratings (avaliações) para os pacotes com base nos clientes
             var clientesSalvos = await dbContext.Users.Where(u => u.Role == "Cliente").ToListAsync();
@@ -462,6 +482,38 @@ namespace travel_agency_back.Data
             {
                 dbContext.Rating.AddRange(ratings);
                 await dbContext.SaveChangesAsync();
+            }
+
+            // Remove o bloco antigo de associação de mídias por ImageUrl
+            // Adiciona todas as mídias reais de cada pacote conforme a estrutura wwwroot/uploads/{packageId}/{arquivo}
+            var wwwrootUploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            if (Directory.Exists(wwwrootUploadsPath))
+            {
+                var packageDirs = Directory.GetDirectories(wwwrootUploadsPath);
+                var realMediaList = new List<PackageMedia>();
+                foreach (var packageDir in packageDirs)
+                {
+                    if (int.TryParse(new DirectoryInfo(packageDir).Name, out int packageId))
+                    {
+                        var mediaFiles = Directory.GetFiles(packageDir);
+                        foreach (var mediaFile in mediaFiles)
+                        {
+                            string relativePath = Path.Combine("uploads", packageId.ToString(), Path.GetFileName(mediaFile)).Replace("\\", "/");
+                            realMediaList.Add(new PackageMedia
+                            {
+                                PackageId = packageId,
+                                ImageURL = relativePath,
+                                MediaType = 1, // 1 para imagem
+                                CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null)
+                            });
+                        }
+                    }
+                }
+                if (realMediaList.Count > 0)
+                {
+                    dbContext.PackageMedia.AddRange(realMediaList);
+                    await dbContext.SaveChangesAsync();
+                }
             }
         }
     }
