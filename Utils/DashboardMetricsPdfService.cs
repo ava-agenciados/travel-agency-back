@@ -147,7 +147,18 @@ namespace travel_agency_back.Utils
                     {
                         table.Cell().Text(s.Status);
                         table.Cell().Text(s.TotalSales.ToString());
-                        table.Cell().Text(s.TotalAmount.ToString("N2", new CultureInfo("pt-BR")));
+                        if (s.Status.Equals("Recusado", StringComparison.OrdinalIgnoreCase))
+                        {
+                            table.Cell().Text("-" + s.TotalAmount.ToString("N2", new CultureInfo("pt-BR"))).FontColor("#d32f2f"); // vermelho
+                        }
+                        else if (s.Status.Equals("Pendente", StringComparison.OrdinalIgnoreCase))
+                        {
+                            table.Cell().Text(s.TotalAmount.ToString("N2", new CultureInfo("pt-BR"))).FontColor("#ff9800"); // laranja
+                        }
+                        else
+                        {
+                            table.Cell().Text(s.TotalAmount.ToString("N2", new CultureInfo("pt-BR"))).FontColor("#28a745"); // verde para aprovado
+                        }
                     }
                 });
                 col.Item().PaddingVertical(10);

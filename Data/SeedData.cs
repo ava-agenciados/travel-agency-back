@@ -87,7 +87,7 @@ namespace travel_agency_back.Data
                 new User { UserName = "mariana.limaYahoo.com", Email = "mariana.limaYahoo.com", FirstName = "Mariana", LastName = "Lima", PhoneNumber = "31999990003", CPFPassport = "11111111114", Role = "Cliente" },
                 new User { UserName = "joao.pereira@gmail.com", Email = "joao.pereira@gmail.com", FirstName = "João", LastName = "Pereira", PhoneNumber = "41999990004", CPFPassport = "11111111115", Role = "Cliente" },
                 new User { UserName = "fernanda.alves@outlook.com", Email = "fernanda.alves@outlook.com", FirstName = "Fernanda", LastName = "Alves", PhoneNumber = "51999990005", CPFPassport = "11111111116", Role = "Cliente" },
-                new User { UserName = "lucas.gomes@yahoo.com", Email = "lucas.gomes@yahoo.com", FirstName = "Lucas", LastName = "Gomes", PhoneNumber = "61999990006", CPFPassport = "11111111117", Role = "Cliente" },
+                new User { UserName = "lucas.gomes.yahoo.com", Email = "lucas.gomes.yahoo.com", FirstName = "Lucas", LastName = "Gomes", PhoneNumber = "61999990006", CPFPassport = "11111111117", Role = "Cliente" },
                 new User { UserName = "juliana.martins@gmail.com", Email = "juliana.martins@gmail.com", FirstName = "Juliana", LastName = "Martins", PhoneNumber = "71999990007", CPFPassport = "11111111118", Role = "Cliente" },
                 new User { UserName = "rafael.oliveira@outlook.com", Email = "rafael.oliveira@outlook.com", FirstName = "Rafael", LastName = "Oliveira", PhoneNumber = "81999990008", CPFPassport = "11111111119", Role = "Cliente" },
 
@@ -406,29 +406,6 @@ namespace travel_agency_back.Data
                 await dbContext.SaveChangesAsync();
             }
 
-            // Adiciona uma imagem em PackageMedia para cada pacote usando o ImageUrl do pacote
-            var pacotesSalvos = await dbContext.Packages.OrderBy(p => p.Id).ToListAsync();
-            var packageMediaList = new List<PackageMedia>();
-            int mediaType = 1; // 1 para imagem
-            DateTime createdAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null);
-            for (int i = 0; i < pacotesSalvos.Count; i++)
-            {
-                var pacote = pacotesSalvos[i];
-                // Adiciona a imagem correspondente do campo ImageUrl
-                packageMediaList.Add(new PackageMedia
-                {
-                    PackageId = pacote.Id,
-                    ImageURL = pacote.ImageUrl,
-                    MediaType = mediaType,
-                    CreatedAt = createdAt
-                });
-            }
-            if (packageMediaList.Count > 0)
-            {
-                dbContext.PackageMedia.AddRange(packageMediaList);
-                await dbContext.SaveChangesAsync();
-            }
-
             // Adiciona Ratings (avaliações) para os pacotes com base nos clientes
             var clientesSalvos = await dbContext.Users.Where(u => u.Role == "Cliente").ToListAsync();
             var pacotesParaAvaliar = await dbContext.Packages.ToListAsync();
@@ -485,15 +462,21 @@ namespace travel_agency_back.Data
             }
 
             // Remove o bloco antigo de associação de mídias por ImageUrl
+            // Limpa registros antigos de PackageMedia para evitar conflitos de FK
+            dbContext.PackageMedia.RemoveRange(dbContext.PackageMedia);
+            await dbContext.SaveChangesAsync();
+
             // Adiciona todas as mídias reais de cada pacote conforme a estrutura wwwroot/uploads/{packageId}/{arquivo}
             var wwwrootUploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
             if (Directory.Exists(wwwrootUploadsPath))
             {
+                // Busca todos os PackageIds válidos do banco
+                var validPackageIds = await dbContext.Packages.Select(p => p.Id).ToListAsync();
                 var packageDirs = Directory.GetDirectories(wwwrootUploadsPath);
                 var realMediaList = new List<PackageMedia>();
                 foreach (var packageDir in packageDirs)
                 {
-                    if (int.TryParse(new DirectoryInfo(packageDir).Name, out int packageId))
+                    if (int.TryParse(new DirectoryInfo(packageDir).Name, out int packageId) && validPackageIds.Contains(packageId))
                     {
                         var mediaFiles = Directory.GetFiles(packageDir);
                         foreach (var mediaFile in mediaFiles)
@@ -512,6 +495,73 @@ namespace travel_agency_back.Data
                 if (realMediaList.Count > 0)
                 {
                     dbContext.PackageMedia.AddRange(realMediaList);
+                    await dbContext.SaveChangesAsync();
+                }
+            }
+
+            // Adiciona reservas (Bookings) para vários clientes e pacotes, com opções aleatórias e mais reservas
+            var bookings = new List<Booking>();
+            var bookingStatuses = new[] { "Aprovado", "Pendente", "Recusado" };
+            // Usa o random já existente
+            int reservasPorClientePorPacote = 2; // Aumenta o volume de reservas
+            for (int i = 0; i < clientesSalvos.Count; i++)
+            {
+                var cliente = clientesSalvos[i];
+                for (int j = 0; j < pacotesParaAvaliar.Count; j++)
+                {
+                    var pacote = pacotesParaAvaliar[j];
+                    for (int k = 0; k < reservasPorClientePorPacote; k++)
+                    {
+                        var status = bookingStatuses[random.Next(bookingStatuses.Length)];
+                        var bookingDate = pacote.BeginDate.AddDays(-random.Next(1, 30));
+                        var travelDate = pacote.BeginDate.AddDays(random.Next(0, 5));
+                        bookings.Add(new Booking
+                        {
+                            UserId = cliente.Id,
+                            PackageId = pacote.Id,
+                            BookingDate = bookingDate,
+                            TravelDate = travelDate,
+                            Status = status,
+                            CreatedAt = bookingDate,
+                            UpdatedAt = bookingDate.AddHours(random.Next(1, 48)),
+                            HasTravelInsurance = random.Next(2) == 0,
+                            HasTourGuide = random.Next(2) == 0,
+                            HasTour = random.Next(2) == 0,
+                            HasActivities = random.Next(2) == 0,
+                            FinalPrice = pacote.Price * (1 - ((decimal)(pacote.DiscountPercent ?? 0) / 100m))
+                        });
+                    }
+                }
+            }
+            if (bookings.Count > 0)
+            {
+                dbContext.Bookings.AddRange(bookings);
+                await dbContext.SaveChangesAsync();
+
+                // Adiciona Payments para cada Booking criado
+                var bookingsSalvos = await dbContext.Bookings.ToListAsync();
+                var paymentMethods = new[] { "Pix", "Boleto", "CartaoCredito", "CartaoDebito" };
+                var payments = new List<Payments>();
+                for (int i = 0; i < bookingsSalvos.Count; i++)
+                {
+                    var booking = bookingsSalvos[i];
+                    var paymentStatus = booking.Status;
+                    if (paymentStatus != "Aprovado" && paymentStatus != "Pendente" && paymentStatus != "Recusado")
+                        paymentStatus = "Pendente";
+                    payments.Add(new Payments
+                    {
+                        BookingId = booking.Id,
+                        Amount = booking.FinalPrice,
+                        PaymentMethod = paymentMethods[i % paymentMethods.Length],
+                        Status = paymentStatus,
+                        PaymentDate = booking.CreatedAt,
+                        CreatedAt = booking.CreatedAt,
+                        UpdatedAt = booking.UpdatedAt
+                    });
+                }
+                if (payments.Count > 0)
+                {
+                    dbContext.Payments.AddRange(payments);
                     await dbContext.SaveChangesAsync();
                 }
             }

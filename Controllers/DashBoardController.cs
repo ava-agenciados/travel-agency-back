@@ -150,7 +150,7 @@ namespace travel_agency_back.Controllers
             Description = "Endpoint protegido, apenas administradores podem deletar pacotes."
         )]
         [HttpDelete("packages/delete/{packageID}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Atendente")]
         public async Task<IActionResult> DeletePackage(int packageID)
         {
             if (packageID <= 0)

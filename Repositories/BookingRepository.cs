@@ -208,7 +208,7 @@ namespace travel_agency_back.Repositories
                     TotalAmount = g.Sum(b => b.Payments.Sum(p => p.Amount))
                 }).ToList();
 
-            // Vendas por status
+            // Vendas por status (corrigido: soma valor para cada status)
             var salesByStatus = bookings
                 .GroupBy(b => b.Status)
                 .Select(g => new StatusSalesDTO
