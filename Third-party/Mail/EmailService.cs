@@ -253,7 +253,7 @@ namespace travel_agency_back.Third_party.Mail
         {
             // Determina se é crédito ou débito baseado nas parcelas
             bool isCredito = parcelas > 1;
-            string tipoCartao = isCredito ? "Crédito" : "Débito";
+            string tipoCartao = isCredito ? "Crédito" : "Debito";
 
             // Usa dados reais do cartão se fornecidos, senão usa dados padrão mascarados
             var cartaoMascarado = !string.IsNullOrEmpty(cardData?.CardNumber) ?

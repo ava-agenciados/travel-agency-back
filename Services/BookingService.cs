@@ -43,6 +43,7 @@ namespace travel_agency_back.Services
             {
                 PackageId = createNewBooking.PackageID,
                 TravelDate = createNewBooking.StartTravel,
+                
                 Companions = createNewBooking.Companions?.Select(c => new Companions
                 {
                     FullName = $"{c.FirstName} {c.LastName}",
@@ -138,7 +139,7 @@ namespace travel_agency_back.Services
                         package.Destination,
                         package.Origin,
                         booking.TravelDate,
-                        booking.TravelDate, // ou outro campo de fim
+                        createNewBooking.EndTravel, // ou outro campo de fim
                         basePrice,
                         extrasValue,
                         discount,
