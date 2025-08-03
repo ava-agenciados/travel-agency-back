@@ -160,7 +160,7 @@ namespace travel_agency_back.Services
                         package.Destination,
                         package.Origin,
                         booking.TravelDate,
-                        booking.TravelDate, // ou outro campo de fim
+                        createNewBooking.EndTravel, // ou outro campo de fim
                         payment.Installments, // parcelas, ajuste conforme necessário
                         "Recusado", // status, ajuste conforme necessário
                         payment.TransactionId.ToString(),
@@ -185,7 +185,7 @@ namespace travel_agency_back.Services
                         package.Destination,
                         package.Origin,
                         booking.TravelDate,
-                        booking.TravelDate, // ou outro campo de fim
+                        createNewBooking.EndTravel, // ou outro campo de fim
                         1, // parcelas, ajuste conforme necessário
                         "Recusado", // status, ajuste conforme necessário
                         payment.TransactionId.ToString(),
