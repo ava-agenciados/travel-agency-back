@@ -515,12 +515,14 @@ namespace travel_agency_back.Data
                         var status = bookingStatuses[random.Next(bookingStatuses.Length)];
                         var bookingDate = pacote.BeginDate.AddDays(-random.Next(1, 30));
                         var travelDate = pacote.BeginDate.AddDays(random.Next(0, 5));
+                        var endTravel = pacote.EndDate; // Usa a data de término do pacote como fictícia
                         bookings.Add(new Booking
                         {
                             UserId = cliente.Id,
                             PackageId = pacote.Id,
                             BookingDate = bookingDate,
                             TravelDate = travelDate,
+                            EndTravel = endTravel, // Corrigido: define EndTravel fictício
                             Status = status,
                             CreatedAt = bookingDate,
                             UpdatedAt = bookingDate.AddHours(random.Next(1, 48)),

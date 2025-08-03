@@ -51,6 +51,7 @@ namespace travel_agency_back.Controllers
                 Id = b.Id,
                 PackageId = b.PackageId,
                 TravelDate = b.TravelDate,
+                EndTravel = b.EndTravel, // Corrigido: retorna o EndTravel da reserva
                 Status = b.Status,
                 Companion = b.Companions?.Select(c => new CompanionResponseDTO
                 {

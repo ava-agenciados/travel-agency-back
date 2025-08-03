@@ -43,7 +43,7 @@ namespace travel_agency_back.Services
             {
                 PackageId = createNewBooking.PackageID,
                 TravelDate = createNewBooking.StartTravel,
-                
+                EndTravel = createNewBooking.EndTravel, // Volta a aceitar o valor enviado pelo usuário
                 Companions = createNewBooking.Companions?.Select(c => new Companions
                 {
                     FullName = $"{c.FirstName} {c.LastName}",
@@ -222,6 +222,7 @@ namespace travel_agency_back.Services
                 Id = b.Id,
                 PackageId = b.PackageId,
                 TravelDate = b.TravelDate,
+                EndTravel = b.EndTravel, // Corrigido: retorna o EndTravel da reserva
                 Status = b.Status,
                 Companion = b.Companions?.Select(c => new CompanionResponseDTO
                 {

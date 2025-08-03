@@ -5,6 +5,7 @@
         public int Id { get; set; }
         public int PackageId { get; set; }
         public DateTime TravelDate { get; set; }
+        public DateTime? EndTravel { get; set; } // Adicionado: data de término da viagem
         public string Status { get; set; }
         public List<CompanionResponseDTO> Companion { get; set; } = new ();
         public List<PaymentResponseDTO> Payment { get; set; }
