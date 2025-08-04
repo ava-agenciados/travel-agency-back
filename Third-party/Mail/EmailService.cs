@@ -88,7 +88,7 @@ namespace travel_agency_back.Third_party.Mail
                 packages.Destination,
                 packages.Origin,
                 booking.TravelDate,
-                booking.BookingDate,
+                booking.EndTravel,
                 payment.TransactionId.ToString(),
                 basePrice,
                 extrasValue,

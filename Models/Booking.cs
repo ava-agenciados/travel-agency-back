@@ -10,7 +10,7 @@
 
         public DateTime BookingDate { get; set; } = DateTime.UtcNow; // Data e hora da reserva
         public DateTime TravelDate { get; set; } // Data da viagem
-        public DateTime? EndTravel { get; set; } // Data de término da viagem (da reserva)
+        public DateTime EndTravel { get; set; } // Data de término da viagem (da reserva)
         public string Status { get; set; } = "Pendente"; // Status da reserva (Pendente, Confirmada, Cancelada)
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow; // Data e hora da última atualização da reserva
