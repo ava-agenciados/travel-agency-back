@@ -8,6 +8,7 @@ using travel_agency_back.Models;
 using travel_agency_back.Repositories.Interfaces;
 using travel_agency_back.Services.Interfaces;
 using travel_agency_back.DTOs.Responses.Dashboard;
+using Microsoft.EntityFrameworkCore; // Necessário para AsNoTracking
 
 namespace travel_agency_back.Services
 {
@@ -426,7 +427,7 @@ namespace travel_agency_back.Services
 
         public async Task<IEnumerable<UserResponseDTO>> GetAllUsersAsync()
         {
-            var users = _userManager.Users.ToList();
+            var users = _userManager.Users.ToList(); // IdentityUserStore não suporta AsNoTracking diretamente
             return users.Select(u => new UserResponseDTO
             {
                 Id = u.Id,

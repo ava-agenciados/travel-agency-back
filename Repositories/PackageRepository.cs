@@ -90,6 +90,7 @@ namespace travel_agency_back.Repositories
         public async Task<IEnumerable<Packages>> GetAllPackagesAsync()
         {
             var packages = await _context.Packages
+                .AsNoTracking()
                 .Include(p => p.Bookings)
                 .Include(p => p.Ratings).ThenInclude(r => r.User)
                 .Include(p => p.PackageMedia)

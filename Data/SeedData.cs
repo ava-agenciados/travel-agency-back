@@ -113,85 +113,90 @@ namespace travel_agency_back.Data
             // Adiciona pacotes de exemplo se não existirem
             if (!await dbContext.Packages.AnyAsync())
             {
-                // Cria LodgingInfo premium e realista para cada destino de pacote
-                var lodgingList = new List<LodgingInfo>
+                // Cria LodgingInfo premium e realista para cada destino de pacote, se não existirem
+                if (!await dbContext.LodgingInfos.AnyAsync())
                 {
-                    // NACIONAIS
-                    new LodgingInfo { // Cataratas do Iguaçu (Foz do Iguaçu)
-                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
-                        Street = "Av. das Cataratas", Number = "2420", Neighborhood = "Vila Yolanda", City = "Foz do Iguaçu", State = "PR", Country = "Brasil", ZipCode = "85853-000", Complement = "Hotel 5 estrelas, vista para as Cataratas"
-                    },
-                    new LodgingInfo { // Maragogi
-                        Baths = 2, Beds = 3, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = true, AirConditioned = true, Breakfast = true,
-                        Street = "Rod. AL-101 Norte", Number = "km 124", Neighborhood = "Praia de Antunes", City = "Maragogi", State = "AL", Country = "Brasil", ZipCode = "57955-000", Complement = "Resort beira-mar, bangalôs exclusivos"
-                    },
-                    new LodgingInfo { // Olinda
-                        Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
-                        Street = "Rua do Amparo", Number = "100", Neighborhood = "Amparo", City = "Olinda", State = "PE", Country = "Brasil", ZipCode = "53025-080", Complement = "Pousada histórica no centro colonial"
-                    },
-                    new LodgingInfo { // Recife
-                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
-                        Street = "Av. Boa Viagem", Number = "4070", Neighborhood = "Boa Viagem", City = "Recife", State = "PE", Country = "Brasil", ZipCode = "51021-000", Complement = "Hotel de luxo à beira-mar"
-                    },
-                    new LodgingInfo { // Rio de Janeiro
-                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
-                        Street = "Av. Atlântica", Number = "3264", Neighborhood = "Copacabana", City = "Rio de Janeiro", State = "RJ", Country = "Brasil", ZipCode = "22070-001", Complement = "Suíte com vista para o mar, Copacabana Palace"
-                    },
-                    new LodgingInfo { // Salvador
-                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = true, AirConditioned = true, Breakfast = true,
-                        Street = "Rua Fonte do Boi", Number = "215", Neighborhood = "Rio Vermelho", City = "Salvador", State = "BA", Country = "Brasil", ZipCode = "41940-360", Complement = "Hotel boutique no bairro boêmio"
-                    },
-                    // INTERNACIONAIS
-                    new LodgingInfo { // Londres
-                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
-                        Street = "Strand", Number = "336", Neighborhood = "Westminster", City = "London", State = "England", Country = "United Kingdom", ZipCode = "WC2R 1HA", Complement = "The Savoy Hotel, luxo clássico londrino"
-                    },
-                    new LodgingInfo { // Madri
-                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
-                        Street = "Calle de Alcalá", Number = "66", Neighborhood = "Salamanca", City = "Madrid", State = "Madrid", Country = "Espanha", ZipCode = "28009", Complement = "Hotel 5 estrelas próximo ao Parque do Retiro"
-                    },
-                    new LodgingInfo { // Moscow
-                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
-                        Street = "Ulitsa Tverskaya", Number = "3", Neighborhood = "Tverskoy", City = "Moscow", State = "Moscow", Country = "Rússia", ZipCode = "125009", Complement = "Hotel de luxo próximo à Praça Vermelha"
-                    },
-                    new LodgingInfo { // New York
-                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
-                        Street = "5th Avenue", Number = "700", Neighborhood = "Manhattan", City = "New York", State = "NY", Country = "USA", ZipCode = "10019", Complement = "The Plaza Hotel, Central Park"
-                    },
-                    new LodgingInfo { // Paris
-                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
-                        Street = "Avenue des Champs-Élysées", Number = "31", Neighborhood = "8th arrondissement", City = "Paris", State = "Île-de-France", Country = "França", ZipCode = "75008", Complement = "Hotel Barrière Le Fouquet's Paris"
-                    },
-                    new LodgingInfo { // Tokyo
-                        Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
-                        Street = "Nishi Shinjuku", Number = "2-2-1", Neighborhood = "Shinjuku", City = "Tokyo", State = "Tokyo", Country = "Japão", ZipCode = "160-0023", Complement = "Park Hyatt Tokyo, vista para o Monte Fuji"
-                    }
-                };
-                await dbContext.LodgingInfos.AddRangeAsync(lodgingList);
-                await dbContext.SaveChangesAsync();
+                    var lodgingList = new List<LodgingInfo>
+                    {
+                        // NACIONAIS
+                        new LodgingInfo { // Cataratas do Iguaçu (Foz do Iguaçu)
+                            Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                            Street = "Avenida das cataratas", Number = "12011", Neighborhood = "Foz do Iguaçu", City = "Foz do Iguaçu", State = "PR", Country = "Brasil", ZipCode = "85853-881", Complement = ""
+                        },
+                        new LodgingInfo { // Maragogi
+                            Baths = 2, Beds = 3, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = true, AirConditioned = true, Breakfast = true,
+                            Street = "Av. Sen. Rui Palmeira", Number = "359", Neighborhood = "Maragogi", City = "Maragogi", State = "AL", Country = "Brasil", ZipCode = "57955-000", Complement = ""
+                        },
+                        new LodgingInfo { // Olinda
+                            Baths = 1, Beds = 2, WifiIncluded = true, ParkingSpot = false, SwimmingPool = false, FitnessCenter = false, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                            Street = "R. de São Francisco", Number = "307", Neighborhood = "Carmo", City = "Olinda", State = "PE", Country = "Brasil", ZipCode = "53120-070", Complement = ""
+                        },
+                        new LodgingInfo { // Recife
+                            Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                            Street = "Rua Imperial", Number = "175", Neighborhood = "São José", City = "Recife", State = "PE", Country = "Brasil", ZipCode = "50090-030", Complement = ""
+                        },
+                        new LodgingInfo { // Rio de Janeiro
+                            Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                            Street = "Rua: Professor Coutinho Fróis", Number = "10", Neighborhood = "Barra da Tijuca", City = "Rio de Janeiro", State = "RJ", Country = "Brasil", ZipCode = "22620-360", Complement = ""
+                        },
+                        new LodgingInfo { // Salvador
+                            Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = true, AirConditioned = true, Breakfast = true,
+                            Street = "R Morro do Escravo Miguel", Number = "320", Neighborhood = "Ondina", City = "Salvador", State = "BA", Country = "Brasil", ZipCode = "40170-000", Complement = ""
+                        },
+                        // INTERNACIONAIS
+                        new LodgingInfo { // Londres
+                            Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                            Street = "The Broadway", Number = "153 - 161", Neighborhood = "Wimbledon", City = "London", State = "London", Country = "Reino Unido", ZipCode = "SW19 1NE", Complement = ""
+                        },
+                        new LodgingInfo { // Madri
+                            Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                            Street = "Calle del Príncipe de Vergara", Number = "92", Neighborhood = "Salamanca", City = "Madrid", State = "Comunidad de Madrid", Country = "Espanha", ZipCode = "28006", Complement = ""
+                        },
+                        new LodgingInfo { // Moscow
+                            Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                            Street = "Mokhovaya St", Number = "д. 10 стр.1", Neighborhood = "Tverskoy", City = "Moscow", State = "Moscow", Country = "Rússia", ZipCode = "119019", Complement = ""
+                        },
+                        new LodgingInfo { // New York
+                            Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                            Street = "Cooper Sq", Number = "25", Neighborhood = "Manhattan", City = "New York", State = "NY", Country = "Estados Unidos", ZipCode = "10003", Complement = ""
+                        },
+                        new LodgingInfo { // Paris
+                            Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                            Street = "Rue de Lille", Number = "93", Neighborhood = "7ᵉ arrondissement ", City = "Paris", State = "Île-de-France", Country = "França", ZipCode = "75007", Complement = ""
+                        },
+                        new LodgingInfo { // Tokyo
+                            Baths = 2, Beds = 2, WifiIncluded = true, ParkingSpot = true, SwimmingPool = true, FitnessCenter = true, RestaurantOnSite = true, PetAllowed = false, AirConditioned = true, Breakfast = true,
+                            Street = "Marunouchi 1 Chome−9−1", Number = "1 Chome−9−1 ", Neighborhood = "Marunouchi", City = "Chiyoda City", State = "Tokyo", Country = "Japão", ZipCode = "100-0005", Complement = "Tokyo Station Hotel"
+                        }
+                    };
+                    await dbContext.LodgingInfos.AddRangeAsync(lodgingList);
+                    await dbContext.SaveChangesAsync();
+                }
 
                 var lodgingInfos = await dbContext.LodgingInfos.ToListAsync();
 
                 // Mapeamento destino -> LodgingInfo
                 int GetLodgingId(string destino)
                 {
-                    // Use FirstOrDefault and fallback to the first lodgingInfo if not found
-                    return destino switch
+                    LodgingInfo? info = destino switch
                     {
-                        "Cataratas do Iguaçu" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Foz do Iguaçu"))?.Id ?? lodgingInfos.First().Id,
-                        "Maragogi" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Maragogi"))?.Id ?? lodgingInfos.First().Id,
-                        "Olinda" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Olinda"))?.Id ?? lodgingInfos.First().Id,
-                        "Recife" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Recife"))?.Id ?? lodgingInfos.First().Id,
-                        "Rio de Janeiro" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Rio de Janeiro"))?.Id ?? lodgingInfos.First().Id,
-                        "Salvador" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Salvador"))?.Id ?? lodgingInfos.First().Id,
-                        "Londres" => lodgingInfos.FirstOrDefault(l => l.City.Contains("London"))?.Id ?? lodgingInfos.First().Id,
-                        "Madri" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Madrid"))?.Id ?? lodgingInfos.First().Id,
-                        "Moscow" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Moscow"))?.Id ?? lodgingInfos.First().Id,
-                        "New York" => lodgingInfos.FirstOrDefault(l => l.City.Contains("New York"))?.Id ?? lodgingInfos.First().Id,
-                        "Paris" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Paris"))?.Id ?? lodgingInfos.First().Id,
-                        "Tokyo" => lodgingInfos.FirstOrDefault(l => l.City.Contains("Tokyo"))?.Id ?? lodgingInfos.First().Id,
-                        _ => lodgingInfos.First().Id
+                        "Cataratas do Iguaçu" => lodgingInfos.FirstOrDefault(l => l.City == "Foz do Iguaçu"),
+                        "Maragogi" => lodgingInfos.FirstOrDefault(l => l.City == "Maragogi"),
+                        "Olinda" => lodgingInfos.FirstOrDefault(l => l.City == "Olinda"),
+                        "Recife" => lodgingInfos.FirstOrDefault(l => l.City == "Recife"),
+                        "Rio de Janeiro" => lodgingInfos.FirstOrDefault(l => l.City == "Rio de Janeiro"),
+                        "Salvador" => lodgingInfos.FirstOrDefault(l => l.City == "Salvador"),
+                        "Londres" => lodgingInfos.FirstOrDefault(l => l.City == "London"),
+                        "Madri" => lodgingInfos.FirstOrDefault(l => l.City == "Madrid"),
+                        "Moscow" => lodgingInfos.FirstOrDefault(l => l.City == "Moscow"),
+                        "New York" => lodgingInfos.FirstOrDefault(l => l.City == "New York"),
+                        "Paris" => lodgingInfos.FirstOrDefault(l => l.City == "Paris"),
+                        "Tokyo" => lodgingInfos.FirstOrDefault(l => l.City == "Chiyoda City"),
+                        _ => null
                     };
+                    if (info == null)
+                        throw new Exception($"LodgingInfo não encontrado para o destino: {destino}");
+                    return info.Id;
                 }
 
                 var pacotes = new List<Packages>
@@ -407,64 +412,74 @@ namespace travel_agency_back.Data
             }
 
             // Adiciona Ratings (avaliações) para os pacotes com base nos clientes
-            var clientesSalvos = await dbContext.Users.Where(u => u.Role == "Cliente").ToListAsync();
-            var pacotesParaAvaliar = await dbContext.Packages.ToListAsync();
-            var comentarios = new List<string>
+            if (!await dbContext.Rating.AnyAsync())
             {
-                "Experiência incrível, recomendo muito!",
-                "O atendimento foi excelente e o destino maravilhoso.",
-                "Gostei bastante, mas poderia ter mais opções de passeios.",
-                "Viagem tranquila, tudo conforme o combinado.",
-                "O hotel era confortável e bem localizado.",
-                "Achei o preço um pouco alto, mas valeu a pena.",
-                "Amei cada momento, voltaria com certeza!",
-                "O guia turístico era muito atencioso.",
-                "Tive alguns problemas com o transporte, mas foram resolvidos.",
-                "Paisagens lindas e ótima organização.",
-                "A comida local foi uma surpresa positiva!",
-                "O pacote superou minhas expectativas.",
-                "Viagem razoável, esperava mais do roteiro.",
-                "Tudo perfeito, sem nenhum contratempo.",
-                "Equipe muito prestativa e simpática.",
-                "Não gostei do hotel, mas o passeio compensou.",
-                "O clima ajudou bastante, aproveitamos muito.",
-                "Faltou organização em alguns momentos.",
-                "O transfer foi pontual e confortável.",
-                "Voltaria a fechar com a agência!"
-            };
-            var random = new Random();
-            var ratings = new List<Rating>();
-            int comentarioIndex = 0;
-            foreach (var pacote in pacotesParaAvaliar)
-            {
-                var clientesParaEstePacote = clientesSalvos.OrderBy(x => random.Next()).Take(5).ToList();
-                var notasUsadas = new HashSet<int>();
-                foreach (var cliente in clientesParaEstePacote)
+                var clientesSalvos = await dbContext.Users.Where(u => u.Role == "Cliente").ToListAsync();
+                var pacotesParaAvaliar = await dbContext.Packages.ToListAsync();
+                var comentarios = new List<string>
                 {
-                    int nota;
-                    do { nota = random.Next(1, 6); } while (!notasUsadas.Add(nota) && notasUsadas.Count < 5);
-                    ratings.Add(new Rating
+                    "Experiência incrível, recomendo muito!",
+                    "O atendimento foi excelente e o destino maravilhoso.",
+                    "Gostei bastante, mas poderia ter mais opções de passeios.",
+                    "Viagem tranquila, tudo conforme o combinado.",
+                    "O hotel era confortável e bem localizado.",
+                    "Achei o preço um pouco alto, mas valeu a pena.",
+                    "Amei cada momento, voltaria com certeza!",
+                    "O guia turístico era muito atencioso.",
+                    "Tive alguns problemas com o transporte, mas foram resolvidos.",
+                    "Paisagens lindas e ótima organização.",
+                    "A comida local foi uma surpresa positiva!",
+                    "O pacote superou minhas expectativas.",
+                    "Viagem razoável, esperava mais do roteiro.",
+                    "Tudo perfeito, sem nenhum contratempo.",
+                    "Equipe muito prestativa e simpática.",
+                    "Não gostei do hotel, mas o passeio compensou.",
+                    "O clima ajudou bastante, aproveitamos muito.",
+                    "Faltou organização em alguns momentos.",
+                    "O transfer foi pontual e confortável.",
+                    "Voltaria a fechar com a agência!"
+                };
+                var random = new Random();
+                var ratings = new List<Rating>();
+                int comentarioIndex = 0;
+                for (int pacoteIdx = 0; pacoteIdx < pacotesParaAvaliar.Count; pacoteIdx++)
+                {
+                    var pacote = pacotesParaAvaliar[pacoteIdx];
+                    var clientesParaEstePacote = clientesSalvos.OrderBy(x => random.Next()).Take(5).ToList();
+                    List<int> notas;
+                    if (pacoteIdx % 3 == 0)
+                        notas = new List<int> { 4, 5, 5, 4, 5 }; // altas
+                    else if (pacoteIdx % 3 == 1)
+                        notas = new List<int> { 1, 2, 2, 1, 2 }; // baixas
+                    else
+                        notas = new List<int> { 3, 3, 4, 2, 3 }; // medianas
+                    for (int i = 0; i < clientesParaEstePacote.Count; i++)
                     {
-                        UserId = cliente.Id,
-                        PackageId = pacote.Id,
-                        Stars = nota,
-                        Comment = comentarios[comentarioIndex % comentarios.Count],
-                        IsAvailable = true,
-                        CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null)
-                    });
-                    comentarioIndex++;
+                        ratings.Add(new Rating
+                        {
+                            UserId = clientesParaEstePacote[i].Id,
+                            PackageId = pacote.Id,
+                            Stars = notas[i % notas.Count],
+                            Comment = comentarios[comentarioIndex % comentarios.Count],
+                            IsAvailable = true,
+                            CreatedAt = DateTime.ParseExact("01/07/2025", "dd/MM/yyyy", null)
+                        });
+                        comentarioIndex++;
+                    }
+                }
+                if (ratings.Count > 0)
+                {
+                    dbContext.Rating.AddRange(ratings);
+                    await dbContext.SaveChangesAsync();
                 }
             }
-            if (ratings.Count > 0)
+
+            // Limpa registros antigos de PackageMedia para evitar conflitos de FK
+            if (await dbContext.PackageMedia.AnyAsync())
             {
-                dbContext.Rating.AddRange(ratings);
+                dbContext.PackageMedia.RemoveRange(dbContext.PackageMedia);
                 await dbContext.SaveChangesAsync();
             }
-
-            // Remove o bloco antigo de associação de mídias por ImageUrl
-            // Limpa registros antigos de PackageMedia para evitar conflitos de FK
-            dbContext.PackageMedia.RemoveRange(dbContext.PackageMedia);
-            await dbContext.SaveChangesAsync();
 
             // Adiciona todas as mídias reais de cada pacote conforme a estrutura wwwroot/uploads/{packageId}/{arquivo}
             var wwwrootUploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
@@ -500,47 +515,55 @@ namespace travel_agency_back.Data
             }
 
             // Adiciona reservas (Bookings) para vários clientes e pacotes, com opções aleatórias e mais reservas
-            var bookings = new List<Booking>();
-            var bookingStatuses = new[] { "Aprovado", "Pendente", "Recusado" };
-            // Usa o random já existente
-            int reservasPorClientePorPacote = 2; // Aumenta o volume de reservas
-            for (int i = 0; i < clientesSalvos.Count; i++)
+            if (!await dbContext.Bookings.AnyAsync())
             {
-                var cliente = clientesSalvos[i];
-                for (int j = 0; j < pacotesParaAvaliar.Count; j++)
+                var clientesSalvos = await dbContext.Users.Where(u => u.Role == "Cliente").ToListAsync();
+                var pacotesParaAvaliar = await dbContext.Packages.ToListAsync();
+                var bookings = new List<Booking>();
+                var bookingStatuses = new[] { "Aprovado", "Pendente", "Recusado" };
+                var random = new Random();
+                int reservasPorClientePorPacote = 2; // Aumenta o volume de reservas
+                for (int i = 0; i < clientesSalvos.Count; i++)
                 {
-                    var pacote = pacotesParaAvaliar[j];
-                    for (int k = 0; k < reservasPorClientePorPacote; k++)
+                    var cliente = clientesSalvos[i];
+                    for (int j = 0; j < pacotesParaAvaliar.Count; j++)
                     {
-                        var status = bookingStatuses[random.Next(bookingStatuses.Length)];
-                        var bookingDate = pacote.BeginDate.AddDays(-random.Next(1, 30));
-                        var travelDate = pacote.BeginDate.AddDays(random.Next(0, 5));
-                        var endTravel = pacote.EndDate; // Usa a data de término do pacote como fictícia
-                        bookings.Add(new Booking
+                        var pacote = pacotesParaAvaliar[j];
+                        for (int k = 0; k < reservasPorClientePorPacote; k++)
                         {
-                            UserId = cliente.Id,
-                            PackageId = pacote.Id,
-                            BookingDate = bookingDate,
-                            TravelDate = travelDate,
-                            EndTravel = endTravel, // Corrigido: define EndTravel fictício
-                            Status = status,
-                            CreatedAt = bookingDate,
-                            UpdatedAt = bookingDate.AddHours(random.Next(1, 48)),
-                            HasTravelInsurance = random.Next(2) == 0,
-                            HasTourGuide = random.Next(2) == 0,
-                            HasTour = random.Next(2) == 0,
-                            HasActivities = random.Next(2) == 0,
-                            FinalPrice = pacote.Price * (1 - ((decimal)(pacote.DiscountPercent ?? 0) / 100m))
-                        });
+                            var status = bookingStatuses[random.Next(bookingStatuses.Length)];
+                            var bookingDate = pacote.BeginDate.AddDays(-random.Next(1, 30));
+                            var travelDate = pacote.BeginDate.AddDays(random.Next(0, 5));
+                            var endTravel = pacote.EndDate; // Usa a data de término do pacote como fictícia
+                            bookings.Add(new Booking
+                            {
+                                UserId = cliente.Id,
+                                PackageId = pacote.Id,
+                                BookingDate = bookingDate,
+                                TravelDate = travelDate,
+                                EndTravel = endTravel, // Corrigido: define EndTravel fictício
+                                Status = status,
+                                CreatedAt = bookingDate,
+                                UpdatedAt = bookingDate.AddHours(random.Next(1, 48)),
+                                HasTravelInsurance = random.Next(2) == 0,
+                                HasTourGuide = random.Next(2) == 0,
+                                HasTour = random.Next(2) == 0,
+                                HasActivities = random.Next(2) == 0,
+                                FinalPrice = pacote.Price * (1 - ((decimal)(pacote.DiscountPercent ?? 0) / 100m))
+                            });
+                        }
                     }
                 }
+                if (bookings.Count > 0)
+                {
+                    dbContext.Bookings.AddRange(bookings);
+                    await dbContext.SaveChangesAsync();
+                }
             }
-            if (bookings.Count > 0)
-            {
-                dbContext.Bookings.AddRange(bookings);
-                await dbContext.SaveChangesAsync();
 
-                // Adiciona Payments para cada Booking criado
+            // Adiciona Payments para cada Booking criado
+            if (!await dbContext.Payments.AnyAsync())
+            {
                 var bookingsSalvos = await dbContext.Bookings.ToListAsync();
                 var paymentMethods = new[] { "Pix", "Boleto", "CartaoCredito", "CartaoDebito" };
                 var payments = new List<Payments>();
